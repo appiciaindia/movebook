@@ -21,6 +21,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (step !== "verify") return;
 
+    
     setTimer(60);
     setCanResend(false);
 
