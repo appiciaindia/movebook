@@ -1,6 +1,4 @@
-
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
+import puppeteer from "puppeteer";
 import { cookies } from "next/headers";
 import Quotation from "@/models/quotation";
 
@@ -18,20 +16,10 @@ export async function GET(request) {
     const authUser = cookieStore.get("auth_user")?.value;
     const authSession = cookieStore.get("auth_session")?.value;
 
-if (process.env.VERCEL) {
-  browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath(),
-    headless: true,
-  });
-} else {
-  const { default: puppeteerLocal } = await import("puppeteer");
-
-  browser = await puppeteerLocal.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
-}
+    browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
 
     const page = await browser.newPage();
 
