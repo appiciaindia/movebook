@@ -1,0 +1,157 @@
+.profileShell {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #eef0f4;
+  padding-bottom: 20px;
+}
+
+.logoutButton {
+  border: none;
+  border-radius: 12px;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 10px 16px;
+  font-weight: 700;
+}
+
+.uploadPanel,
+.formSection {
+  border: 1px solid #eef0f4;
+  border-radius: 16px;
+  background-color: #ffffff;
+  padding: 18px;
+}
+
+.uploadPanel {
+  min-height: 230px;
+}
+
+.uploadPanel h5,
+.formSection h5 {
+  margin-bottom: 16px;
+  color: #111827;
+  font-weight: 700;
+}
+
+.uploadPanel img {
+  display: block;
+  width: 120px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background-color: #f3f6fb;
+}
+
+.uploadPanel a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 80px;
+  margin-bottom: 14px;
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.emptyPreview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 80px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background-color: #f3f6fb;
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.formGrid label {
+  display: block;
+  margin-bottom: 8px;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.formInput {
+  width: 100%;
+  border: none !important;
+  background-color: #f3f6fb !important;
+  border-radius: 12px;
+  min-height: 48px;
+  padding: 10px 12px;
+  color: #111827;
+}
+
+.formInput:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.16) !important;
+  border: none !important;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.message {
+  margin-top: 18px;
+  border-radius: 12px;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  padding: 12px 14px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.saveButton {
+  width: 100%;
+  margin-top: 18px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb, #38bdf8);
+  color: #ffffff;
+  padding: 12px 16px;
+  font-weight: 700;
+}
+
+@media (max-width: 991px) {
+  .profileShell {
+    padding: 24px;
+  }
+
+  .formGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575px) {
+  .profileShell {
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  .profileHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}

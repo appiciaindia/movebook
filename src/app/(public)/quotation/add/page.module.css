@@ -1,0 +1,18 @@
+.cardHeader{
+    background-color: #21273d;
+    color: #fff;
+    padding: 10px;
+}
+.labelSize{
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+}
+.formbutton{
+   background-color: #21273d !important;
+   padding: 5px 20px;
+   border-radius: 0;
+   outline: none !important;
+  color: #fff !important;
+}

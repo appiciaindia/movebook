@@ -1,6 +1,5 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+ --theme-color:#000671;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -47,3 +46,105 @@ a {
     color-scheme: dark;
   }
 }
+
+input:focus {
+  outline: none !important;
+  box-shadow: none !important; 
+  border-color: #ededed !important;
+ 
+}
+textarea:focus {
+  outline: none !important;
+  box-shadow: none !important; 
+  border-color: #ededed !important;
+ 
+}
+
+select:focus {
+  outline: none !important;
+  box-shadow: none !important; 
+  border-color: #ededed !important;
+ 
+}
+
+
+/* 
+#pdf-content {
+  font-size: 16px;
+  line-height: 1.4;
+  color: #000;
+}
+
+
+#pdf-content h4 {
+  font-size: 21px;
+  margin: 10px 0;
+  padding: 5px;
+}
+
+
+#pdf-content h5, 
+#pdf-content h6 {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+
+#pdf-content p {
+  margin: 2px 0;
+}
+
+
+#pdf-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+
+#pdf-content td, 
+#pdf-content th {
+  padding: 4px 6px;
+  vertical-align: middle;
+}
+
+
+
+#pdf-content .mb-3,
+#pdf-content .mt-3 {
+  margin-top: 5px !important;
+  margin-bottom: 5px !important;
+}
+
+#pdf-content .p-4 {
+  padding: 10px !important;
+}
+
+
+#pdf-content img {
+  max-height: 60px !important;
+}
+
+
+#pdf-content .border {
+  padding: 6px !important;
+}
+
+
+#pdf-content .bg-dark {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+
+#pdf-content table, 
+#pdf-content tr, 
+#pdf-content td {
+  page-break-inside: avoid;
+}
+
+
+#pdf-content tr {
+  line-height: 1.2;
+} */

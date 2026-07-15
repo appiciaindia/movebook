@@ -1,0 +1,95 @@
+.pages {
+  width: 100%;
+  min-height: 280mm;
+  border: 1px solid var(--theme-color);
+  box-sizing: border-box;
+  padding: 10px;
+  page-break-after: always;
+}
+.pages:last-child {
+  page-break-after: auto;
+}
+.quationDate h4{
+    font-size: 16px;
+   
+}
+.quationDate h4 span{
+    font-size: 18px;
+    font-weight: 700;
+}
+.quationDate p{
+    margin:0px;
+    line-height: 1;
+    font-size: 14px;
+}
+.quationDate p span{
+   font-weight: 700;
+}
+.clientDetails{
+    margin-top: 20px;
+}
+
+.clientDetails p{
+    font-size: 14px;
+    margin: 0px;
+    line-height: 1.2;
+}
+.clientDetails p span{
+     font-size: 14px;
+    font-weight: 700;
+
+}
+.company_info h5{
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--theme-color);
+}
+
+.company_info p{
+    font-size: 14px;
+    margin: 0px;
+    line-height: 1.2;
+}
+
+.moveDetails h6{
+    font-size: 18px;
+    font-weight: 600;
+    color:#fff;
+    padding: 5px;
+    background-color: var(--theme-color);
+}
+.moveDetails p {
+    font-size: 14px;
+    margin: 0px;
+    line-height: 1.2;
+}
+
+.moveDetails p span{
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.paymentDetails h6{
+    font-size: 18px;
+    font-weight: 600;
+     color:#fff;
+    padding: 5px;
+    background-color: var(--theme-color);
+    margin-bottom: 10px;
+    
+}
+
+.paymentTable{
+    font-size: 14px;
+    border: 1px solid #e5e7eb;
+}
+
+.paymentTable td{
+   padding: 2px 6px;
+}
+
+.paymentTable .tableData{
+    color:#fff;
+    background-color: var(--theme-color);
+   
+}

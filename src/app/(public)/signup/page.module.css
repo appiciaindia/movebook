@@ -1,0 +1,73 @@
+.pageconatiner{
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.loginconatiner{
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+.loginImage {
+  width: 100%;
+  height:70vh;
+ object-fit: cover;
+  border-radius: 20px;
+}
+
+.forminput {
+  border: none !important;
+  background-color: #F2F2F2 !important;
+}
+
+.forminput::placeholder {
+  color: #ddd;
+  font-size: 12px;
+}
+
+.forminput:focus {
+  outline: none !important;
+  box-shadow: none !important; 
+  border: none !important; 
+}
+.loginbutton{
+  background: linear-gradient(135deg, #2563eb, #38bdf8);
+  color: white !important;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  transition: 0.3s;
+}
+
+.loginbutton:hover {
+  opacity: 0.9;
+}
+
+.otpInput {
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 1px solid #F2F2F2;
+  background: #F2F2F2;
+  color: #000;
+  backdrop-filter: blur(5px);
+  margin-bottom: 20px;
+
+}
+
+.otpInput:focus {
+  outline: none !important;
+  box-shadow: none !important; 
+  border: none !important; 
+}
+
+@media (max-width: 576px) {
+
+    .loginimagecontainer{
+      display: none;
+    }
+}
