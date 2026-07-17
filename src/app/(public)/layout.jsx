@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import Header from "../../component/Header";
+import Header from "../../component/header/Header";
 import { useEffect, useState } from "react";
 import { getStoredUser, getUserId, isAuthenticated } from "@/lib/auth";
 

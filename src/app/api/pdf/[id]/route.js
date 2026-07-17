@@ -1,108 +1,27 @@
+import { pdf } from "@react-pdf/renderer";
+import Quotation from "../../../../component/quotation/quotation";
 
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
-import { cookies } from "next/headers";
-import Quotation from "@/models/quotation";
+export async function GET(req, { params }) {
+  const { id } = await params;
 
-export async function GET(request) {
-  const pathname = request.nextUrl.pathname;
-  const id = pathname.split("/").pop();
-  let browser;
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/invoice/${id}`,
+    {
+      cache: "no-store",
+    }
+  );
 
-  const data = await Quotation.findById(id);
-  const quotationNo = data?.quotation_number || "Quotation";
-  try {
-    // Current logged-in user ki cookies
-    const cookieStore = await cookies();
+  const data = await res.json();
 
-    const authUser = cookieStore.get("auth_user")?.value;
-    const authSession = cookieStore.get("auth_session")?.value;
+  const buffer = await pdf(
+    <Quotation data={data} />
+  ).toBuffer();
 
-if (process.env.VERCEL) {
-  browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath(),
-    headless: true,
+  return new Response(buffer, {
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `inline; filename="quotation-${id}.pdf"`,
+      "Cache-Control": "no-store",
+    },
   });
-} else {
-  const { default: puppeteerLocal } = await import("puppeteer");
-
-  browser = await puppeteerLocal.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
-}
-
-    const page = await browser.newPage();
-
-    // Puppeteer browser me cookies set karo
-    const browserCookies = [];
-
-    if (authUser) {
-      browserCookies.push({
-        name: "auth_user",
-        value: authUser,
-        domain: "localhost", // Production me apna domain likhna
-        path: "/",
-      });
-    }
-
-    if (authSession) {
-      browserCookies.push({
-        name: "auth_session",
-        value: authSession,
-        domain: "localhost",
-        path: "/",
-      });
-    }
-
-    if (browserCookies.length) {
-      await page.setCookie(...browserCookies);
-    }
-
-    // Invoice page open
-    await page.goto(`http://localhost:3000/invoice/${id}`, {
-      waitUntil: "networkidle0",
-    });
-
-    // Element load hone ka wait
-    await page.waitForSelector("#pdf-content");
-
-    const element = await page.$("#pdf-content");
-
-    // Sirf isi element ki PDF ke liye baaki page hide
-    await page.evaluate(() => {
-      document.body.innerHTML =
-        document.getElementById("pdf-content").outerHTML;
-    });
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: {
-        top: "2mm",
-        right: "2mm",
-        bottom: "2mm",
-        left: "2mm",
-      },
-    });
-
-    await browser.close();
-
-    return new Response(pdf, {
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="Quotation-${quotationNo}.pdf"`,
-      },
-    });
-  } catch (err) {
-    if (browser) await browser.close();
-
-    return Response.json(
-      {
-        success: false,
-        error: err.message,
-      },
-      { status: 500 },
-    );
-  }
 }
