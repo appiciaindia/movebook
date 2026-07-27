@@ -1,0 +1,52 @@
+.customerShell {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(50, 50, 93, 0.08);
+  padding: 30px;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.formCard {
+  background: #f8f9fb;
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.listCard {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e9ecef;
+  padding: 24px;
+}
+
+.form-card-title {
+  margin-bottom: 18px;
+}
+
+.form-card-row {
+  gap: 18px;
+}
+
+.form-control,
+textarea.form-control {
+  border-radius: 12px;
+  border: 1px solid #d8dbe0;
+  background: #fff;
+}
+
+.form-control:focus,
+textarea.form-control:focus {
+  box-shadow: none;
+  border-color: #4e73df;
+}
+
+button.btn-primary {
+  border-radius: 10px;
+  padding: 10px 24px;
+}

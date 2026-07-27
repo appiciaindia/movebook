@@ -5,15 +5,22 @@ import styles from "./page.module.css";
 import Swal from "sweetalert2";
 import { getStoredUser, getUserId } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
+import CustomerPage from "@/component/customer/page";
+import Select from "react-select";
 
 // LIVE DATE fUNCTION
 
 export default function Quotation() {
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
   const router = useRouter();
 
   const searchParams = useSearchParams();
 
   const customerId = searchParams.get("customerId");
+
 
   const getTodayDate = () => {
     const today = new Date();
@@ -84,6 +91,7 @@ export default function Quotation() {
 
   // State managements
   const [formData, setFormData] = useState({
+     customerId: "",
     quotation_number: "",
     quotation_company_name: "",
     moving_type: "",
@@ -183,7 +191,7 @@ export default function Quotation() {
     }));
   };
 
-  // useeffect Function
+  // use effect Function
   useEffect(() => {
     const total =
       Number(formData.freight_charge || 0) +
@@ -257,13 +265,8 @@ export default function Quotation() {
 
         const result = await response.json();
 
-        console.log("response", response.status);
-        console.log("result", result);
-
         if (response.ok && result.success) {
           const customer = result.data;
-
-          console.log("customer", customer);
 
           setFormData((prev) => ({
             ...prev,
@@ -292,6 +295,96 @@ export default function Quotation() {
 
     getCustomer();
   }, [customerId]);
+
+  //customer change function
+
+const loadCustomers = async () => {
+  const user = getStoredUser();
+  const userId = getUserId(user);
+
+  if (!userId) return;
+
+  try {
+    const response = await fetch(
+      `/api/customer?userId=${encodeURIComponent(userId)}`
+    );
+
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+      setCustomers(result.data || []);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+useEffect(() => {
+  loadCustomers();
+}, []);
+
+  const customerOptions = customers.map((customer) => ({
+    value: customer._id,
+    label: customer.party_name,
+    customer,
+  }));
+
+  const handleCustomerChange = (option) => {
+    setSelectedCustomer(option);
+
+    if (!option) return;
+
+    const customer = option.customer;
+
+
+
+    setFormData((prev) => ({
+      ...prev,
+      customerId: customer._id,
+      party_name: customer.party_name || "",
+      quotation_company_name: customer.company_name || "",
+      quotation_email: customer.email || "",
+      quotation_mobile: customer.mobile || "",
+      company_gst: customer.gst_no || "",
+      origin_state: customer.state || "",
+      origin_city: customer.city || "",
+      origin_address: customer.address || "",
+    }));
+  };
+
+  useEffect(() => {
+  if (!customerId || customers.length === 0) return;
+
+  const customer = customers.find(
+    (item) => item._id.toString() === customerId.toString()
+  );
+
+  if (!customer) return;
+
+  const selectedOption = {
+    value: customer._id,
+    label: customer.party_name,
+    customer,
+  };
+
+  setSelectedCustomer(selectedOption);
+
+  handleCustomerChange(selectedOption);
+}, [customerId, customers]);
+
+  const customSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      minHeight: "38px",
+      fontSize: "14px",
+      borderColor: "#dee2e6", // Bootstrap default border
+      boxShadow: "none", // Blue shadow remove
+      "&:hover": {
+        borderColor: "#dee2e6",
+      },
+    }),
+  };
+
   // chnage function
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -382,6 +475,51 @@ export default function Quotation() {
                       value={formData.quotation_number || ""}
                       readOnly
                     />
+                  </div>
+                  <div className="col-lg-5 ">
+                    <label className={styles.labelSize}>
+                      Customer (ग्राहक)
+                    </label>
+
+                    <div className="d-flex  align-items-start">
+                      <div className="flex-grow-1">
+                        <Select
+                          styles={customSelectStyles}
+                          options={customerOptions}
+                          value={selectedCustomer}
+                          onChange={handleCustomerChange}
+                          getOptionLabel={(option) => option.label}
+                          formatOptionLabel={(option, { context }) =>
+                            context === "menu" ? (
+                              <div>
+                                <div
+                                  className="fw-semibold"
+                                  style={{ fontSize: "14px", lineHeight: ".3" }}
+                                >
+                                  {option.customer.party_name}
+                                </div>
+                                <small
+                                  className="text-muted"
+                                  style={{ fontSize: "12px" }}
+                                >
+                                  {option.customer.email}
+                                </small>
+                              </div>
+                            ) : (
+                              option.label
+                            )
+                          }
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        className="btn text-primary border-0 pt-0"
+                        onClick={() => setShowCustomerModal(true)}
+                      >
+                        <i className="ri-add-box-fill fs-3"></i>
+                      </button>
+                    </div>
                   </div>
                   <div className="col-lg-6">
                     <label
@@ -1667,6 +1805,35 @@ export default function Quotation() {
             </div>
           </div>
         </form>
+      </div>
+
+      <div
+        className={`modal fade ${showCustomerModal ? "show d-block" : ""}`}
+        tabIndex="-1"
+        style={{
+          backgroundColor: "rgba(0,0,0,.5)",
+          display: showCustomerModal ? "block" : "none",
+        }}
+      >
+        <div className="modal-dialog modal-xl modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Add Customer</h5>
+
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setShowCustomerModal(false)}
+              />
+            </div>
+
+            <div className="modal-body">
+              <div className="container-fluid ">
+                <CustomerPage   onSuccess={loadCustomers}/>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -13,6 +13,13 @@ const QuotationSchema = new mongoose.Schema({
       ref: "User",
       required: true,
     },
+
+      customerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Customer",
+    required: true,
+  },
+  
   quotation_number:String,
   quotation_company_name:String,
   moving_type:String,

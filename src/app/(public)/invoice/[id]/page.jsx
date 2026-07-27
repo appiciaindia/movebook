@@ -1,6 +1,6 @@
 
 import { PDFViewer } from "@react-pdf/renderer";
-import Quotation from "../../../../component/quotation/quotation";
+import Quotation from "../../../../component/pdf/quotation/quotation";
 async function getInvoice(id) {
   const res = await fetch(`http://localhost:3000/api/invoice/${id}`, {
     cache: "no-store",

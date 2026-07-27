@@ -8,7 +8,8 @@ import {
   Image,
 } from "@react-pdf/renderer";
 
-const styles = StyleSheet.create({
+const createStyles = (themeColor = "#000671") =>
+StyleSheet.create({
   page: {
     padding: 25,
     fontSize: 10,
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
     right: 15,
     bottom: 15,
     borderWidth: 1,
-    borderColor: "#0B4EA2", // Theme Color
+    borderColor: themeColor,
   },
 
   header: {
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
   companyName: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#0B4EA2",
+    color: themeColor,
   },
   companyinfo: {
     fontSize: 11,
@@ -95,7 +96,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   heading: {
-    backgroundColor: "#0B4EA2",
+    backgroundColor: themeColor,
     color: "#fff",
     padding: 6,
     marginTop: 0,
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     color: "#fff",
-    backgroundColor: "#0B4EA2", // Theme Color
+    backgroundColor: themeColor, // Theme Color
     padding: 5,
     marginBottom: 10,
   },
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
   },
 
   tableData: {
-    backgroundColor: "#0B4EA2",
+    backgroundColor: themeColor,
     color: "#fff",
   },
 
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
 
   itemHeader: {
     flexDirection: "row",
-    backgroundColor: "#0B4EA2", // Theme Color
+    backgroundColor: themeColor, // Theme Color
     color: "#fff",
     fontWeight: "bold",
   },
@@ -313,6 +314,11 @@ const styles = StyleSheet.create({
 });
 
 export default function Quotation({ data }) {
+
+   const styles = createStyles(
+    data?.theme_color || "#000671"
+  );
+
   const subTotal = Number(data.sub_total || 0);
 
   const surchargePercent = Number(data.surcharge_percent || 0);

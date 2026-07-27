@@ -31,6 +31,7 @@ const CustomerSchema = new mongoose.Schema(
     email: {
       type: String,
       trim: true,
+      required: true,
       lowercase: true,
       sparse: true,
     },
@@ -61,7 +62,29 @@ const CustomerSchema = new mongoose.Schema(
 );
 
 CustomerSchema.index({ userId: 1, mobile: 1 }, { unique: true });
-CustomerSchema.index({ userId: 1, email: 1 }, { unique: true, sparse: true });
-CustomerSchema.index({ userId: 1, gst_no: 1 }, { unique: true, sparse: true });
+CustomerSchema.index(
+  { userId: 1, email: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      email: {
+        $exists: true,
+        $ne: "",
+      },
+    },
+  }
+);
+CustomerSchema.index(
+  { userId: 1, gst_no: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      gst_no: {
+        $exists: true,
+        $ne: "",
+      },
+    },
+  }
+);
 
 export default mongoose.models.Customer || mongoose.model("Customer", CustomerSchema);

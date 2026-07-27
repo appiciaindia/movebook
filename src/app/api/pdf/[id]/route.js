@@ -1,5 +1,5 @@
 import { pdf } from "@react-pdf/renderer";
-import Quotation from "../../../../component/quotation/quotation";
+import Quotation from "../../../../component/pdf/quotation/quotation";
 
 export async function GET(req, { params }) {
   const { id } = await params;

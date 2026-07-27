@@ -144,19 +144,27 @@ export async function POST(req) {
       );
     }
 
-    const customer = await Customer.create({
-      userId: body.userId,
-      customer_id: createCustomerId(),
-      party_name: party_name.trim(),
-      company_name: company_name?.trim() || "",
-      gst_no: gst_no?.trim().toUpperCase() || "",
-      email: email?.trim().toLowerCase() || "",
-      mobile: mobile.trim(),
-      address: address?.trim() || "",
-      city: city.trim(),
-      state: state?.trim() || "",
-      pincode: pincode?.trim() || "",
-    });
+  const customerData = {
+  userId: body.userId,
+  customer_id: createCustomerId(),
+  party_name: party_name.trim(),
+  company_name: company_name?.trim() || "",
+  mobile: mobile.trim(),
+  address: address?.trim() || "",
+  city: city.trim(),
+  state: state?.trim() || "",
+  pincode: pincode?.trim() || "",
+};
+
+if (email?.trim()) {
+  customerData.email = email.trim().toLowerCase();
+}
+
+if (gst_no?.trim()) {
+  customerData.gst_no = gst_no.trim().toUpperCase();
+}
+
+const customer = await Customer.create(customerData);
 
     return NextResponse.json({
       success: true,

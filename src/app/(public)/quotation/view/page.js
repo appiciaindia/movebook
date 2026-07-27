@@ -4,6 +4,7 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import { getStoredUser, getUserId } from "@/lib/auth";
+import Pagination from "../../../../component/common/pagination/page";
 
 export default function QuotationsPage() {
   const [data, setData] = useState([]);
@@ -20,15 +21,22 @@ export default function QuotationsPage() {
 
     if (!userId) return;
 
-    const res = await fetch(`/api/quotation?type=list&userId=${encodeURIComponent(userId)}`, {
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `/api/quotation?type=list&userId=${encodeURIComponent(userId)}`,
+      {
+        cache: "no-store",
+      },
+    );
     const result = await res.json();
     setData(result.data || []);
   };
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    require("bootstrap/dist/js/bootstrap.bundle.min.js");
   }, []);
 
   // 👇 Back navigation fix
@@ -69,16 +77,52 @@ export default function QuotationsPage() {
   const filteredData = data.filter(
     (item) =>
       item.party_name?.toLowerCase().includes(search.toLowerCase()) ||
-      item.quotation_company_name?.toLowerCase().includes(search.toLowerCase()) ||
+      item.quotation_company_name
+        ?.toLowerCase()
+        .includes(search.toLowerCase()) ||
       item.quotation_number?.toLowerCase().includes(search.toLowerCase()),
   );
+  const handleWhatsapp = (item) => {
+    const phone = item.customer?.mobile || item.quotation_mobile;
+    const message = `Hello`;
+
+    window.open(
+      `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`,
+      "_blank",
+    );
+  };
+  const handleEmail = async (item) => {
+    const email = item.customer?.email || item.quotation_email;
+
+    if (!email) {
+      alert("Email not found");
+      return;
+    }
+
+    const res = await fetch("/api/send-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to: email,
+        quotationId: item._id,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert("Email sent successfully");
+    } else {
+      alert(data.message);
+    }
+  };
 
   // Pagination Logic
   const indexOfLast = currentPage * entries;
   const indexOfFirst = indexOfLast - entries;
   const currentData = filteredData.slice(indexOfFirst, indexOfLast);
-
-  const totalPages = Math.ceil(filteredData.length / entries);
 
   return (
     <div className="container mt-4">
@@ -86,7 +130,7 @@ export default function QuotationsPage() {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4>All Quotations</h4>
         <Link href="/quotation/add" className="btn btn-primary">
-          + Add Quotation
+          + New
         </Link>
       </div>
 
@@ -114,19 +158,20 @@ export default function QuotationsPage() {
       </div>
 
       {/* Table */}
-      <div className="table-responsive">
-        <table className="table table-bordered table-striped">
-          <thead className="table-dark">
+      <div className="">
+        <table className="table table-light table-hover">
+          <thead className="">
             <tr>
               <th>#</th>
               <th>Quotation Number</th>
               <th>Party Name</th>
               <th>Company Name</th>
+              <th>Mobile Number</th>
               <th>Action</th>
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="table-group-divider">
             {currentData.length === 0 ? (
               <tr>
                 <td colSpan="5" className="text-center">
@@ -140,31 +185,75 @@ export default function QuotationsPage() {
                   <td>{item.quotation_number}</td>
                   <td>{item.party_name}</td>
                   <td>{item.quotation_company_name}</td>
+                  <td>{item.quotation_mobile}</td>
 
                   <td>
-                    <div className="d-flex gap-2">
-                      <Link
-                        href={`/quotation/edit/${item._id}`}
-                        className="btn btn-warning btn-sm"
-                      >
-                        Edit
-                      </Link>
-
+                    <div className="dropdown">
                       <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => handleDelete(item._id)}
+                        className="btn btn-light btn-sm border-0"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
                       >
-                        Delete
+                        <i className="ri-more-2-fill fs-5"></i>
                       </button>
 
-                      <button
-                        onClick={() =>
-                          window.open(`/api/pdf/${item._id}`, "_blank")
-                        }
-                        className="btn btn-success btn-sm"
-                      >
-                        PDF
-                      </button>
+                      <ul className="dropdown-menu dropdown-menu-end shadow">
+                        <li>
+                          <Link
+                            href={`/quotation/edit/${item._id}`}
+                            className="dropdown-item"
+                          >
+                            <i className="ri-edit-line me-2"></i>
+                            Edit
+                          </Link>
+                        </li>
+
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() =>
+                              window.open(`/api/pdf/${item._id}`, "_blank")
+                            }
+                          >
+                            <i className="ri-file-pdf-line me-2"></i>
+                            PDF
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => handleEmail(item)}
+                          >
+                            <i className="ri-mail-line me-2"></i>
+                            Email
+                          </button>
+                        </li>
+
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => handleWhatsapp(item)}
+                          >
+                            <i className="ri-whatsapp-line me-2 text-success"></i>
+                            WhatsApp
+                          </button>
+                        </li>
+
+                        <li>
+                          <hr className="dropdown-divider" />
+                        </li>
+
+                        <li>
+                          <button
+                            className="dropdown-item text-danger"
+                            onClick={() => handleDelete(item._id)}
+                          >
+                            <i className="ri-delete-bin-line me-2"></i>
+                            Delete
+                          </button>
+                        </li>
+                      </ul>
                     </div>
                   </td>
                 </tr>
@@ -175,35 +264,12 @@ export default function QuotationsPage() {
       </div>
 
       {/* Pagination UI */}
-      <div className="d-flex justify-content-between align-items-center mt-3">
-        <div>
-          Showing {indexOfFirst + 1} to{" "}
-          {Math.min(indexOfLast, filteredData.length)} of {filteredData.length}{" "}
-          entries
-        </div>
-
-        <div>
-          <button
-            className="btn btn-sm btn-secondary me-2"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(currentPage - 1)}
-          >
-            Prev
-          </button>
-
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <button
-            className="btn btn-sm btn-secondary ms-2"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(currentPage + 1)}
-          >
-            Next
-          </button>
-        </div>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalItems={filteredData.length}
+        entries={entries}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }

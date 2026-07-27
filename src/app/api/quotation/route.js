@@ -10,19 +10,36 @@ export async function GET(req) {
     await connectDB();
 
     const { searchParams } = new URL(req.url);
+
     const type = searchParams.get("type");
     const userId = searchParams.get("userId");
+    const customerId = searchParams.get("customerId");
 
-    // ✅ CASE 1: Get All Quotations (Listing Page)
+    // ✅ CASE 1: Get Quotations
     if (type === "list") {
       if (!userId) {
         return NextResponse.json(
-          { success: false, message: "User ID is required" },
+          {
+            success: false,
+            message: "User ID is required",
+          },
           { status: 400 }
         );
       }
 
-      const data = await Quotation.find({ userId }).sort({ createdAt: -1 });
+      // Dynamic Filter
+      const filter = {
+        userId,
+      };
+
+      // Agar customerId aayi hai to us customer ki hi quotations lao
+      if (customerId) {
+        filter.customerId = customerId;
+      }
+
+      const data = await Quotation.find(filter).sort({
+        createdAt: -1,
+      });
 
       return NextResponse.json({
         success: true,
@@ -30,8 +47,11 @@ export async function GET(req) {
       });
     }
 
-    // ✅ CASE 2: Generate Quotation Number (Form Page)
-    const quotation_no = await generateQuotationNumber(Quotation, userId);
+    // ✅ CASE 2: Generate Quotation Number
+    const quotation_no = await generateQuotationNumber(
+      Quotation,
+      userId
+    );
 
     return NextResponse.json({
       success: true,
