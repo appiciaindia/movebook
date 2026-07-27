@@ -31,7 +31,6 @@ const CustomerSchema = new mongoose.Schema(
     email: {
       type: String,
       trim: true,
-      required: true,
       lowercase: true,
       sparse: true,
     },
