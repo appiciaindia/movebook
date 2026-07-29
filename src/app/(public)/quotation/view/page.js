@@ -122,7 +122,9 @@ export default function QuotationsPage() {
   // Pagination Logic
   const indexOfLast = currentPage * entries;
   const indexOfFirst = indexOfLast - entries;
-  const currentData = filteredData.slice(indexOfFirst, indexOfLast);
+const currentData = [...filteredData]
+  .reverse()
+  .slice(indexOfFirst, indexOfLast);
 
   return (
     <div className="container mt-4">

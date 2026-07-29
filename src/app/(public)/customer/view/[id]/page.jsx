@@ -17,7 +17,7 @@ export default function CustomerViewPage() {
 
   const [customer, setCustomer] = useState(null);
   const [customers, setCustomers] = useState([]);
-   const [refresh, setRefresh] = useState(false);
+  const [refresh, setRefresh] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
@@ -39,7 +39,6 @@ export default function CustomerViewPage() {
 
       if (response.ok && result.success) {
         setCustomer(result.data);
-        
       } else {
         setCustomer(null);
       }
@@ -54,7 +53,7 @@ export default function CustomerViewPage() {
     if (id) {
       fetchCustomer();
     }
-  }, [id,refresh]);
+  }, [id, refresh]);
 
   // Model Open
   useEffect(() => {
@@ -155,9 +154,9 @@ export default function CustomerViewPage() {
   // Pagination Logic
   const indexOfLast = currentPage * entries;
   const indexOfFirst = indexOfLast - entries;
-  const currentData = filteredData.slice(indexOfFirst, indexOfLast);
-
-  
+const currentData = [...filteredData]
+  .reverse()
+  .slice(indexOfFirst, indexOfLast);
 
   // Tabs Active
   useEffect(() => {
@@ -188,7 +187,7 @@ export default function CustomerViewPage() {
 
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h3 className="fw-bold mb-1">Customer Profile</h3>
+          <h4 className="">Customer Profile</h4>
 
           <small className="text-muted">View customer information</small>
         </div>
@@ -204,7 +203,7 @@ export default function CustomerViewPage() {
 
       {/* Customer Card */}
 
-      <div className="card shadow-sm border-0 rounded-4">
+      <div className="card  border-0 ">
         <div className="card-body p-4">
           <div className="row">
             <div className="col-lg-2 text-center">
@@ -299,7 +298,7 @@ export default function CustomerViewPage() {
         </div>
       </div>
 
-      <div className="card shadow-sm border-0 rounded-4 mt-4">
+      <div className="card border-0 rounded-4 mt-4">
         <div className="card-header bg-white">
           <ul className="nav nav-pills">
             <li className="nav-item">

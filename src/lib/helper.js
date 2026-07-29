@@ -1,29 +1,46 @@
-import Quotation from "@/models/quotation";
+import Counter from "@/models/Counter";
 
-export const generateQuotationNumber = async (QuotationModel, userId) => {
+/**
+ * Preview Number
+ * Counter increment nahi karega.
+ * Sirf Add Quotation page me dikhane ke liye.
+ */
+export const getQuotationPreviewNumber = async (userId) => {
   const year = new Date().getFullYear();
 
-  const query = {
-    quotation_number: { $regex: `^Q-${year}-` },
-  };
+  const counterId = `quotation_${userId}_${year}`;
 
-  if (userId) {
-    query.userId = userId;
-  }
+  const counter = await Counter.findById(counterId);
 
-  const lastQuotation = await QuotationModel.findOne(query).sort({ quotation_number: -1 });
-
-  let nextNumber = 1;
-
-  if (lastQuotation?.quotation_number) {
-    const lastNumber = parseInt(
-      lastQuotation.quotation_number.split("-")[2]
-    );
-
-    if (!isNaN(lastNumber)) {
-      nextNumber = lastNumber + 1;
-    }
-  }
+  const nextNumber = (counter?.seq || 0) + 1;
 
   return `Q-${year}-${String(nextNumber).padStart(4, "0")}`;
+};
+
+/**
+ * Final Number
+ * Save ke time call karna.
+ * Atomic Increment karega.
+ */
+export const generateQuotationNumber = async (userId) => {
+  const year = new Date().getFullYear();
+
+  const counterId = `quotation_${userId}_${year}`;
+
+  const counter = await Counter.findOneAndUpdate(
+    {
+      _id: counterId,
+    },
+    {
+      $inc: {
+        seq: 1,
+      },
+    },
+    {
+      new: true,
+      upsert: true,
+    }
+  );
+
+  return `Q-${year}-${String(counter.seq).padStart(4, "0")}`;
 };

@@ -1,14 +1,21 @@
 .wrapper {
   width: 100%;
 }
-.mainContainer {
-  display: flex;
-}
+
 .content {
-  flex: 1;
-  padding: 0px;
+    margin-top: 63px;
+  margin-left: 260px;
+  height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+
+
 }
 .header{
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
     display: flex;
     align-items: center;
     background-color: #21273d;
@@ -249,16 +256,18 @@
 .menulistContainer{
     list-style: none;
     padding: 20px;
+    gap: 10px;
     
 }
 .menulist{
     font-size: 16px;
     color: #21273d;
-    padding: 10px;
+    padding: 8px;
+    margin-bottom: 2px;
     border-radius: 0px;
     transition: all .3s;
 }
-.menulist:hover,.menulist:active{
+.menulist:hover,.active{
     background-color: #418dfb;
     color: #fff;
     border-radius: 10px;
@@ -290,9 +299,10 @@
 
 @media (min-width: 992px) {
   .dektopMenu {
+    top: 62px;
     left: 0;
-    position: static;
-    height: auto;
+    position: fixed;
+    height: calc(100vh - 62px);
   }
 }
 
@@ -309,4 +319,38 @@
   .profileFormGrid {
     grid-template-columns: 1fr;
   }
+}
+
+.searchWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.searchList {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: #fff;
+  color: #21273d;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 9999;
+}
+
+.searchItem {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.searchItem:last-child {
+  border-bottom: none;
+}
+
+.searchItem:hover {
+  background: #f8f9fa;
 }

@@ -2,13 +2,50 @@
 import styles from "./page.module.css";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "remixicon/fonts/remixicon.css";
 import { getStoredUser, getUserId } from "@/lib/auth";
 
 export default function Header({ children }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [search, setSearch] = useState("");
+  const [customerData, setCustomerData] = useState([]);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const user = getStoredUser();
+        const userId = getUserId(user);
+
+        if (!userId) return;
+
+        const res = await fetch(
+          `/api/customer?userId=${encodeURIComponent(userId)}`,
+        );
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          setCustomerData(data.data || []);
+        }
+      } catch (error) {
+        console.error("Customer fetch error:", error);
+      }
+    };
+
+    fetchCustomers();
+  }, []);
+
+  const filteredCustomers = customerData.filter((customer) =>
+    [customer.party_name, customer.mobile, customer.email]
+      .filter(Boolean)
+      .some((field) => field.toLowerCase().includes(search.toLowerCase())),
+  );
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -21,7 +58,9 @@ export default function Header({ children }) {
           return;
         }
 
-        const response = await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`);
+        const response = await fetch(
+          `/api/profile?userId=${encodeURIComponent(userId)}`,
+        );
         const result = await response.json();
 
         if (response.ok && result.success && result.data) {
@@ -49,7 +88,7 @@ export default function Header({ children }) {
               <div className="col-lg-2 col-md-2 col-2">
                 <div>
                   <h3 className={`d-none d-lg-block mb-0 ${styles.brandName}`}>
-                   MoveBook
+                    MoveBook
                   </h3>
                   <span
                     className="d-block d-lg-none"
@@ -67,18 +106,51 @@ export default function Header({ children }) {
                     </span>
                     <span className={styles.searchContainer}>
                       <i className="ri-search-line"></i>
-                      <input
-                        type="text"
-                        name=""
-                        placeholder="Search In Customers ( / )"
-                        id=""
-                      />
+                      <div className={styles.searchWrapper}>
+                        <input
+                          type="text"
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          placeholder="Search Customers..."
+                        />
+
+                        {search.trim() !== "" && (
+                          <div className={styles.searchList}>
+                            {filteredCustomers.length > 0 ? (
+                              filteredCustomers.map((customer) => (
+                                <div
+                                  key={customer._id}
+                                  className={styles.searchItem}
+                                  onClick={() => {
+                                    setSearch("");
+                                    router.push(
+                                      `/customer/view/${customer._id}`,
+                                    );
+                                  }}
+                                >
+                                  <div className="fw-semibold">
+                                    {customer.party_name}
+                                  </div>
+                                  <small className="text-muted">
+                                    <i className="ri-phone-line me-1"></i>
+                                    {customer.mobile}
+                                  </small>
+                                </div>
+                              ))
+                            ) : (
+                              <div className={styles.searchItem}>
+                                No customer found
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </span>
                   </div>
                 </div>
                 <div className="d-block d-lg-none ">
                   <h5 className={`mb-0 ${styles.mobileCompanyName}`}>
-                   MoveBook
+                    MoveBook
                   </h5>
                 </div>
               </div>
@@ -156,24 +228,37 @@ export default function Header({ children }) {
             <div>
               <ul className={styles.menulistContainer}>
                 <Link href="/dashboard" className="text-decoration-none">
-                  <li className={styles.menulist}>
+                  <li
+                    className={`${styles.menulist} ${
+                      pathname === "/dashboard" ? styles.active : ""
+                    }`}
+                  >
                     <i className="ri-home-5-line me-3"></i>
                     Home
                   </li>
                 </Link>
-                      <Link href="/customer" className="text-decoration-none">
-                  <li className={styles.menulist}>
+
+                <Link href="/customer" className="text-decoration-none">
+                  <li
+                    className={`${styles.menulist} ${
+                      pathname.startsWith("/customer") ? styles.active : ""
+                    }`}
+                  >
                     <i className="ri-user-3-line me-3"></i>
                     Customers
                   </li>
                 </Link>
+
                 <Link href="/quotation/view" className="text-decoration-none">
-                  <li className={styles.menulist}>
+                  <li
+                    className={`${styles.menulist} ${
+                      pathname.startsWith("/quotation") ? styles.active : ""
+                    }`}
+                  >
                     <i className="ri-file-list-3-line me-3"></i>
                     Quotations
                   </li>
                 </Link>
-          
               </ul>
             </div>
           </aside>

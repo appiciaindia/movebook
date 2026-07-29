@@ -21,7 +21,6 @@ export default function Quotation() {
 
   const customerId = searchParams.get("customerId");
 
-
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split("T")[0];
@@ -91,7 +90,7 @@ export default function Quotation() {
 
   // State managements
   const [formData, setFormData] = useState({
-     customerId: "",
+    customerId: "",
     quotation_number: "",
     quotation_company_name: "",
     moving_type: "",
@@ -239,17 +238,22 @@ export default function Quotation() {
 
       if (!userId) return;
 
-      const res = await fetch(
-        `/api/quotation?userId=${encodeURIComponent(userId)}`,
-      );
-      const data = await res.json();
+      try {
+        const res = await fetch(
+          `/api/quotation/preview?userId=${encodeURIComponent(userId)}`,
+        );
 
-      if (data.success) {
-        setFormData((prev) => ({
-          ...prev,
-          quotation_number: data.quotation_no,
-          userId,
-        }));
+        const data = await res.json();
+
+        if (data.success) {
+          setFormData((prev) => ({
+            ...prev,
+            quotation_number: data.quotation_number,
+            userId,
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch quotation preview:", error);
       }
     };
 
@@ -298,30 +302,30 @@ export default function Quotation() {
 
   //customer change function
 
-const loadCustomers = async () => {
-  const user = getStoredUser();
-  const userId = getUserId(user);
+  const loadCustomers = async () => {
+    const user = getStoredUser();
+    const userId = getUserId(user);
 
-  if (!userId) return;
+    if (!userId) return;
 
-  try {
-    const response = await fetch(
-      `/api/customer?userId=${encodeURIComponent(userId)}`
-    );
+    try {
+      const response = await fetch(
+        `/api/customer?userId=${encodeURIComponent(userId)}`,
+      );
 
-    const result = await response.json();
+      const result = await response.json();
 
-    if (response.ok && result.success) {
-      setCustomers(result.data || []);
+      if (response.ok && result.success) {
+        setCustomers(result.data || []);
+      }
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    console.error(error);
-  }
-};
+  };
 
-useEffect(() => {
-  loadCustomers();
-}, []);
+  useEffect(() => {
+    loadCustomers();
+  }, []);
 
   const customerOptions = customers.map((customer) => ({
     value: customer._id,
@@ -335,8 +339,6 @@ useEffect(() => {
     if (!option) return;
 
     const customer = option.customer;
-
-
 
     setFormData((prev) => ({
       ...prev,
@@ -353,24 +355,24 @@ useEffect(() => {
   };
 
   useEffect(() => {
-  if (!customerId || customers.length === 0) return;
+    if (!customerId || customers.length === 0) return;
 
-  const customer = customers.find(
-    (item) => item._id.toString() === customerId.toString()
-  );
+    const customer = customers.find(
+      (item) => item._id.toString() === customerId.toString(),
+    );
 
-  if (!customer) return;
+    if (!customer) return;
 
-  const selectedOption = {
-    value: customer._id,
-    label: customer.party_name,
-    customer,
-  };
+    const selectedOption = {
+      value: customer._id,
+      label: customer.party_name,
+      customer,
+    };
 
-  setSelectedCustomer(selectedOption);
+    setSelectedCustomer(selectedOption);
 
-  handleCustomerChange(selectedOption);
-}, [customerId, customers]);
+    handleCustomerChange(selectedOption);
+  }, [customerId, customers]);
 
   const customSelectStyles = {
     control: (provided, state) => ({
@@ -435,7 +437,7 @@ useEffect(() => {
 
       // 👇 redirect after success
       setTimeout(() => {
-        router.push("/quotation/view"); // 👈 tumhara view page route
+        router.back(); // 👈 tumhara view page route
       }, 1500);
     } else {
       Swal.fire({
@@ -448,8 +450,17 @@ useEffect(() => {
 
   return (
     <div className="container-fluid p-lg-4 p-2">
-      <div className="profileContainer">
-        <h3 className="fw-bold">QUOTATION</h3>
+      <div className={styles.profileContainer}>
+        <div className="d-flex align-items-center justify-content-between mb-3">
+          <h3 className="fw-bold mb-0">QUOTATION</h3>
+          <button
+            className="btn btn-outline-primary"
+            onClick={() => router.back()}
+          >
+            <i className="ri-arrow-left-line me-2"></i>
+            Back
+          </button>
+        </div>
         <form onSubmit={handleSubmit} className="container mt-4">
           <div className="row g-4">
             {/* QUOTATION Details */}
@@ -943,22 +954,7 @@ useEffect(() => {
                       onChange={handleChange}
                     />
                   </div>
-                  <div className="col-4 bg-success text-white p-2">
-                    <label
-                      className={`${styles.labelSize} text-white`}
-                      htmlFor="sub_total"
-                    >
-                      Sub Total
-                    </label>
-                    <input
-                      className="form-control bg-success text-white border-0 fw-semibold fs-2"
-                      name="sub_total"
-                      placeholder="Sub Total"
-                      onChange={handleChange}
-                      value={formData.sub_total}
-                      readOnly
-                    />
-                  </div>
+                 
                   <div className="col-lg-4">
                     <label
                       className={styles.labelSize}
@@ -1797,8 +1793,22 @@ useEffect(() => {
                 </div>
               </div>
             </div>
-            <div className="">
-              {/* Submit */}
+            <div className={styles.bottomBar}>
+              <div>
+                <h6 className="m-0">SUB Total Amount</h6>
+                <div className="d-flex align-items-center">
+                  <h4 className="m-0 text-primary">₹</h4>
+                  <input
+                    className="form-control text-primary border-0 fw-semibold fs-3 m-0"
+                    name="sub_total"
+                    placeholder="Sub Total"
+                    onChange={handleChange}
+                    value={formData.sub_total}
+                    readOnly
+                  />
+                </div>
+              </div>
+
               <button type="submit" className={`btn ${styles.formbutton}`}>
                 Save
               </button>
@@ -1829,7 +1839,7 @@ useEffect(() => {
 
             <div className="modal-body">
               <div className="container-fluid ">
-                <CustomerPage   onSuccess={loadCustomers}/>
+                <CustomerPage onSuccess={loadCustomers} />
               </div>
             </div>
           </div>

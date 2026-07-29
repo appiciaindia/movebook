@@ -16,3 +16,30 @@
    outline: none !important;
   color: #fff !important;
 }
+
+.profileContainer {
+  height: calc(100vh - 70px); /* Header ke hisaab se adjust karo */
+  overflow-y: auto;
+  padding-bottom: 90px; /* Bottom bar ki height */
+}
+
+.bottomBar {
+   
+  position: fixed;
+  bottom: 0;
+  left: 260px; /* Sidebar width */
+  right: 0;
+  width: calc(100% - 260px);
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1050;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.formbutton {
+  min-width: 140px;
+}

@@ -192,11 +192,11 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="container-fluid p-4">
+    <div className="container-fluid">
       <div className={styles.profileShell}>
         <div className={styles.profileHeader}>
           <div>
-            <h3 className="fw-bold mb-1">Profile Details</h3>
+            <h4>Profile Details</h4>
             <p className="text-muted mb-0">Update company and bank details.</p>
           </div>
           <button

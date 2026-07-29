@@ -17,7 +17,7 @@ const defaultForm = {
   pincode: "",
 };
 
-export default function CustomerPage({ mode = "add", customerId = null,onSuccess }) {
+export default function CustomerPage({ mode = "add", customerId = null,onSuccess, onClose }) {
   const [formData, setFormData] = useState(defaultForm);
   const [errors, setErrors] = useState([]);
   const [message, setMessage] = useState("");
@@ -191,7 +191,11 @@ const handleSubmit = async (event) => {
     }
 
     // Optional: Modal close
-    // onClose?.();
+   setTimeout(() => {
+  setMessage("");
+  setErrors([]);
+  onClose?.();
+}, 1000);
 
   } catch (error) {
     setErrors([

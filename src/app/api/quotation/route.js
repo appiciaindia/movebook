@@ -79,7 +79,7 @@ export async function POST(req) {
       );
     }
 
-    const quotation_no = await generateQuotationNumber(Quotation, body.userId);
+    const quotation_no = await generateQuotationNumber(body.userId);
 
     const newQuotation = await Quotation.create({
       ...body,

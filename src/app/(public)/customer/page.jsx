@@ -120,16 +120,18 @@ function page() {
   const indexOfLast = currentPage * entries;
   const indexOfFirst = indexOfLast - entries;
 
-  const currentData = filteredData.slice(indexOfFirst, indexOfLast);
+const currentData = [...filteredData]
+  .reverse()
+  .slice(indexOfFirst, indexOfLast);
 
   return (
-    <div className="container-fluid p-4">
+    <div className="container-fluid">
       <div className={styles.customerShell}>
         <div className={styles.headerRow}></div>
         {/* Search + Entries */}
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div className="">
-            <h3 className="fw-bold mb-1">All Customers</h3>
+            <h4 className="">All Customers</h4>
             <div className="input-group">
               <input
                 type="text"
@@ -278,6 +280,7 @@ function page() {
       <div
         className={`modal fade ${showCustomerModal ? "show d-block" : ""}`}
         tabIndex="-1"
+         onHide={() => setShowCustomerModal(false)}
         style={{
           backgroundColor: "rgba(0,0,0,.5)",
           display: showCustomerModal ? "block" : "none",
@@ -297,7 +300,7 @@ function page() {
 
             <div className="modal-body">
               <div className="container-fluid ">
-                <CustomerPage setCustomers={setCustomers} mode="add"   onSuccess={loadCustomers} />
+                <CustomerPage setCustomers={setCustomers} mode="add" onSuccess={loadCustomers} onClose={() => setShowCustomerModal(false)} />
               </div>
             </div>
           </div>
@@ -307,6 +310,7 @@ function page() {
       <div
         className={`modal fade ${showEditCustomerModal ? "show d-block" : ""}`}
         tabIndex="-1"
+        onHide={() => setShowEditCustomerModal(false)}
         style={{
           backgroundColor: "rgba(0,0,0,.5)",
           display: showEditCustomerModal ? "block" : "none",
@@ -331,6 +335,7 @@ function page() {
                   mode="edit"
                   customerId={editCustomerId}
                   onSuccess={loadCustomers}
+                  onClose={() => setShowEditCustomerModal(false)}
                 />
               </div>
             </div>

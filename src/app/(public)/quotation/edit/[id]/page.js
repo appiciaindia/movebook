@@ -752,7 +752,7 @@ export default function EditQuotation() {
                       onChange={handleChange}
                     />
                   </div>
-                  <div className="col-4 bg-success text-white p-2">
+                  {/* <div className="col-4 bg-success text-white p-2">
                     <label
                       className={`${styles.labelSize} text-white`}
                       htmlFor="sub_total"
@@ -767,7 +767,7 @@ export default function EditQuotation() {
                       value={formData.sub_total}
                       readOnly
                     />
-                  </div>
+                  </div> */}
                   <div className="col-lg-4">
                     <label
                       className={styles.labelSize}
@@ -1609,8 +1609,27 @@ export default function EditQuotation() {
           </div>
      
 
+    <div className={styles.bottomBar}>
+              <div>
+                <h6 className="m-0">SUB Total Amount</h6>
+                <div className="d-flex align-items-center">
+                  <h4 className="m-0 text-primary">₹</h4>
+                  <input
+                    className="form-control text-primary border-0 fw-semibold fs-3 m-0"
+                    name="sub_total"
+                    placeholder="Sub Total"
+                    onChange={handleChange}
+                    value={formData.sub_total}
+                    readOnly
+                  />
+                </div>
+              </div>
 
-        <button className="btn btn-success mt-3">Update</button>
+              <button type="submit" className={`btn ${styles.formbutton}`}>
+                Update
+              </button>
+            </div>
+        {/* <button className="btn btn-success mt-3">Update</button> */}
       </form>
     </div>
   );
