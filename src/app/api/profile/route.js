@@ -9,9 +9,9 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 
-async function getThemeColor(imagePath) {
+export async function getThemeColor(imageBuffer) {
   try {
-    const { data, info } = await sharp(imagePath)
+    const { data } = await sharp(imageBuffer)
       .resize(250, 250, { fit: "inside" })
       .ensureAlpha()
       .raw()
@@ -25,16 +25,10 @@ async function getThemeColor(imagePath) {
       const b = data[i + 2];
       const a = data[i + 3];
 
-      // Transparent pixels ignore
       if (a < 20) continue;
-
-      // White / Near White ignore
       if (r > 240 && g > 240 && b > 240) continue;
-
-      // Black / Near Black ignore (optional)
       if (r < 15 && g < 15 && b < 15) continue;
 
-      // Similar colors ko group karne ke liye
       const rr = Math.round(r / 10) * 10;
       const gg = Math.round(g / 10) * 10;
       const bb = Math.round(b / 10) * 10;
@@ -64,6 +58,62 @@ async function getThemeColor(imagePath) {
     return "#000671";
   }
 }
+
+// async function getThemeColor(imagePath) {
+//   try {
+//     const { data, info } = await sharp(imagePath)
+//       .resize(250, 250, { fit: "inside" })
+//       .ensureAlpha()
+//       .raw()
+//       .toBuffer({ resolveWithObject: true });
+
+//     const colorMap = new Map();
+
+//     for (let i = 0; i < data.length; i += 4) {
+//       const r = data[i];
+//       const g = data[i + 1];
+//       const b = data[i + 2];
+//       const a = data[i + 3];
+
+//       // Transparent pixels ignore
+//       if (a < 20) continue;
+
+//       // White / Near White ignore
+//       if (r > 240 && g > 240 && b > 240) continue;
+
+//       // Black / Near Black ignore (optional)
+//       if (r < 15 && g < 15 && b < 15) continue;
+
+//       // Similar colors ko group karne ke liye
+//       const rr = Math.round(r / 10) * 10;
+//       const gg = Math.round(g / 10) * 10;
+//       const bb = Math.round(b / 10) * 10;
+
+//       const key = `${rr},${gg},${bb}`;
+
+//       colorMap.set(key, (colorMap.get(key) || 0) + 1);
+//     }
+
+//     let dominant = "#000671";
+//     let max = 0;
+
+//     for (const [key, count] of colorMap.entries()) {
+//       if (count > max) {
+//         max = count;
+
+//         const [r, g, b] = key.split(",").map(Number);
+
+//         dominant =
+//           "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
+//       }
+//     }
+
+//     return dominant;
+//   } catch (err) {
+//     console.error(err);
+//     return "#000671";
+//   }
+// }
 
 const requiredRegistrationFields = [
   ["full_name", "Full Name"],
@@ -318,26 +368,27 @@ export async function POST(req) {
     const panCardFile = data.get("pan_card");
     const signFile = data.get("signature");
 
-    const uploadDir = path.join(process.cwd(), "public/uploads");
-
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
     if (hasFile(logoFile)) {
-      body.company_logo = await saveUpload(logoFile, uploadDir);
+      const logoUpload = await uploadToCloudinary(logoFile);
 
-      const logoPath = path.join(process.cwd(), "public", body.company_logo);
+      body.company_logo = logoUpload.url;
+      body.company_logo_public_id = logoUpload.public_id;
 
-      body.theme_color = await getThemeColor(logoPath);
+      body.theme_color = await getThemeColor(logoUpload.buffer);
     }
 
     if (hasFile(panCardFile)) {
-      body.pan_card = await saveUpload(panCardFile, uploadDir);
+      const panUpload = await uploadToCloudinary(panCardFile, "MoveBook");
+
+      body.pan_card = panUpload.url;
+      body.pan_card_public_id = panUpload.public_id;
     }
 
     if (hasFile(signFile)) {
-      body.signature = await saveUpload(signFile, uploadDir);
+      const signUpload = await uploadToCloudinary(signFile, "MoveBook");
+
+      body.signature = signUpload.url;
+      body.signature_public_id = signUpload.public_id;
     }
 
     // JWT User
@@ -417,50 +468,85 @@ export async function PUT(req) {
       return validationResponse(validationErrors);
     }
 
+    const existingProfile = await Profile.findOne({
+      userId: authUser.userId,
+    });
+
     const logoFile = data.get("company_logo");
     const panCardFile = data.get("pan_card");
     const signFile = data.get("signature");
 
-    const uploadDir = path.join(process.cwd(), "public/uploads");
-
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
+    // Company Logo
     if (hasFile(logoFile)) {
-      body.company_logo = await saveUpload(logoFile, uploadDir);
+      try {
+        if (existingProfile?.company_logo_public_id) {
+          await cloudinary.uploader.destroy(
+            existingProfile.company_logo_public_id,
+          );
+        }
+      } catch (err) {
+        console.error("Logo delete failed:", err);
+      }
 
-      const logoPath = path.join(process.cwd(), "public", body.company_logo);
+      const logoUpload = await uploadToCloudinary(logoFile, "MoveBook");
 
-      body.theme_color = await getThemeColor(logoPath);
+      body.company_logo = logoUpload.url;
+      body.company_logo_public_id = logoUpload.public_id;
+      body.theme_color = await getThemeColor(logoUpload.buffer);
     }
 
+    // PAN Card
     if (hasFile(panCardFile)) {
-      body.pan_card = await saveUpload(panCardFile, uploadDir);
+      try {
+        if (existingProfile?.pan_card_public_id) {
+          await cloudinary.uploader.destroy(existingProfile.pan_card_public_id);
+        }
+      } catch (err) {
+        console.error("PAN delete failed:", err);
+      }
+
+      const panUpload = await uploadToCloudinary(panCardFile, "MoveBook");
+
+      body.pan_card = panUpload.url;
+      body.pan_card_public_id = panUpload.public_id;
     }
 
+    // Signature
     if (hasFile(signFile)) {
-      body.signature = await saveUpload(signFile, uploadDir);
+      try {
+        if (existingProfile?.signature_public_id) {
+          await cloudinary.uploader.destroy(
+            existingProfile.signature_public_id,
+          );
+        }
+      } catch (err) {
+        console.error("Signature delete failed:", err);
+      }
+
+      const signUpload = await uploadToCloudinary(signFile, "MoveBook");
+
+      body.signature = signUpload.url;
+      body.signature_public_id = signUpload.public_id;
     }
 
     // JWT User
     body.userId = authUser.userId;
 
-   const updated = await Profile.findOneAndUpdate(
-  { userId: authUser.userId },
-  {
-    $set: body,
-  },
-  {
-    new: true,
-    runValidators: true,
-    strict: false,
-  }
-);
+    const updated = await Profile.findOneAndUpdate(
+      { userId: authUser.userId },
+      {
+        $set: body,
+      },
+      {
+        new: true,
+        runValidators: true,
+        strict: false,
+      },
+    );
 
-await User.findByIdAndUpdate(authUser.userId, {
-  isProfileCompleted: true,
-});
+    await User.findByIdAndUpdate(authUser.userId, {
+      isProfileCompleted: true,
+    });
 
     return NextResponse.json({
       success: true,

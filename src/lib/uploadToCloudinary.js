@@ -1,13 +1,8 @@
-import cloudinary from "./cloudinary";
+import cloudinary from "@/lib/cloudinary";
 
 export async function uploadToCloudinary(file, folder = "MoveBook") {
-  if (!file) return null;
- 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-  const fileName = file.name;
-  const fileExtension = fileName.spilit(".").pop();
-
 
   return new Promise((resolve, reject) => {
     cloudinary.uploader
@@ -22,6 +17,7 @@ export async function uploadToCloudinary(file, folder = "MoveBook") {
           resolve({
             url: result.secure_url,
             public_id: result.public_id,
+            buffer, // <-- return buffer bhi
           });
         }
       )
