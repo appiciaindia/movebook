@@ -1,79 +1,98 @@
 import connectDB from "@/lib/db";
-import Otp from "@/models/Otp";
 import User from "@/models/User";
+import Otp from "@/models/Otp";
 
 export async function POST(req) {
   try {
+    const { email, otp, mode } = await req.json();
 
-    const { phone, otp, mode } = await req.json();
-console.log("MODE:", mode);
-    const normalizedPhone =
-      typeof phone === "string"
-        ? phone.trim()
-        : "";
+    if (!email || !otp) {
+      return Response.json({
+        success: false,
+        message: "Email and OTP are required.",
+      });
+    }
 
     await connectDB();
 
-    const activeRecord = await Otp.findOne({
-      phone: normalizedPhone,
-      otp,
-    });
+    // OTP Record
+    const otpRecord = await Otp.findOne({ email });
 
-    if (!activeRecord) {
+    if (!otpRecord) {
       return Response.json({
         success: false,
-        message: "Invalid OTP",
+        message: "OTP not found.",
       });
     }
 
-    if (new Date() > activeRecord.expiresAt) {
+    // OTP Match
+    if (otpRecord.otp !== otp) {
       return Response.json({
         success: false,
-        message: "OTP expired",
+        message: "Invalid OTP.",
       });
     }
 
-    await Otp.deleteMany({
-      phone: normalizedPhone,
-    });
+    // OTP Expiry
+    if (new Date() > otpRecord.expiresAt) {
+      return Response.json({
+        success: false,
+        message: "OTP has expired.",
+      });
+    }
 
-    let user = await User.findOne({
-      phone: normalizedPhone,
-    });
+    let user = await User.findOne({ email });
 
+    // Signup
+    if (mode === "signup") {
+      if (!user) {
+        user = await User.create({
+          email,
+          isVerified: true,
+        });
+      } else {
+        user.isVerified = true;
+        await user.save();
+      }
+
+      // OTP delete
+      await Otp.deleteOne({ _id: otpRecord._id });
+
+      return Response.json({
+        success: true,
+        message: "OTP Verified",
+        user,
+        redirectTo: "/register",
+      });
+    }
+
+    // Login
     if (!user) {
-      user = await User.create({
-        phone: normalizedPhone,
+      return Response.json({
+        success: false,
+        message: "Account not found.",
       });
     }
-console.log(mode);
-    return Response.json({
 
+    user.isVerified = true;
+    await user.save();
+
+    // OTP delete
+    await Otp.deleteOne({ _id: otpRecord._id });
+
+    return Response.json({
       success: true,
-
-      message: "OTP verified",
-
+      message: "OTP Verified",
       user,
-
-      redirectTo:
-        mode === "signup"
-          ? "/register"
-          : "/dashboard",
-
+      redirectTo: "/dashboard",
     });
 
-  }
-
-  catch (error) {
+  } catch (error) {
+    console.error("VERIFY ERROR:", error);
 
     return Response.json({
-
       success: false,
-
-      message:
-        error.message
-
+      message: error.message,
     });
-
   }
 }

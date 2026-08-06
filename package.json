@@ -12,6 +12,8 @@
     "@react-pdf/renderer": "^4.5.1",
     "@sparticuz/chromium": "^149.0.0",
     "bootstrap": "^5.3.8",
+    "cloudinary": "^2.10.0",
+    "jose": "^6.2.5",
     "mongoose": "^8.23.0",
     "next": "16.2.2",
     "node-vibrant": "^4.0.4",
@@ -24,7 +26,8 @@
     "react-select": "^5.10.2",
     "remixicon": "^4.9.1",
     "sharp": "^0.35.3",
-    "sweetalert2": "^11.26.24"
+    "sweetalert2": "^11.26.24",
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "eslint": "^9",

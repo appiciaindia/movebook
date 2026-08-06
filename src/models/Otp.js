@@ -2,12 +2,36 @@ import mongoose from "mongoose";
 
 const OtpSchema = new mongoose.Schema(
   {
-    email: String,
-    phone: String,
-    otp: String,
-    expiresAt: Date,
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      index: true,
+    },
+
+    otp: {
+      type: String,
+      required: true,
+    },
+
+    expiresAt: {
+      type: Date,
+      required: true,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-export default mongoose.models.Otp || mongoose.model("Otp", OtpSchema);
+OtpSchema.index(
+  {
+    expiresAt: 1,
+  },
+  {
+    expireAfterSeconds: 0,
+  }
+);
+
+export default mongoose.models.Otp ||
+mongoose.model("Otp", OtpSchema);

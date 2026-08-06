@@ -69,15 +69,7 @@ export async function middleware(request) {
 
   // register Routes
   // Force register page until profile is completed
-//   if (
-//   user &&
-//   !user.isProfileCompleted &&
-//   pathname !== "/register"
-// ) {
-//   return NextResponse.redirect(
-//     new URL("/register", request.url)
-//   );
-// }
+  
 
   // Public Routes
   if (isPathMatch(pathname, publicPaths)) {

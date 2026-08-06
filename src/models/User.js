@@ -16,6 +16,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "user", // admin / user
     },
+    isProfileCompleted: {
+    type: Boolean,
+    default: false,
+},
   },
   { timestamps: true }
 );

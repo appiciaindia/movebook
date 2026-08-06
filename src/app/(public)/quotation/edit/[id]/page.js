@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import styles from "@/app/(public)/quotation/add/page.module.css";
 import Swal from "sweetalert2";
 import { useRouter, useParams } from "next/navigation";
-import { getStoredUser, getUserId } from "@/lib/auth";
 
 export default function EditQuotation() {
   const router = useRouter();
@@ -152,36 +151,57 @@ export default function EditQuotation() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const user = getStoredUser();
-        const userId = getUserId(user);
+        // Current User
+        const meRes = await fetch("/api/me", {
+          cache: "no-store",
+        });
 
-        if (!userId) {
+        if (!meRes.ok) {
+          throw new Error("Session expired");
+        }
+
+        const meResult = await meRes.json();
+
+        if (!meResult.success || !meResult.user) {
           throw new Error("User not found");
         }
 
-        const res = await fetch(
+        const userId = meResult.user._id;
+
+        // Fetch Quotation
+        const quotationRes = await fetch(
           `/api/quotation/${id}?userId=${encodeURIComponent(userId)}`,
+          {
+            cache: "no-store",
+          },
         );
 
-        if (!res.ok) {
-          throw new Error("Failed to fetch");
+        if (!quotationRes.ok) {
+          throw new Error("Failed to fetch quotation");
         }
 
-        const data = await res.json();
+        const quotationResult = await quotationRes.json();
 
-        if (data.success) {
-          setFormData(data.data);
+        if (quotationResult.success) {
+          setFormData(quotationResult.data);
         } else {
-          Swal.fire("Error ❌", data.message, "error");
+          Swal.fire("Error ❌", quotationResult.message, "error");
         }
       } catch (error) {
-        console.log(error);
-        Swal.fire("Error ❌", "Something went wrong", "error");
+        console.error(error);
+
+        Swal.fire("Error ❌", error.message || "Something went wrong", "error");
+
+        if (error.message === "Session expired") {
+          router.push("/login");
+        }
       }
     };
 
-    if (id) fetchData();
-  }, [id]);
+    if (id) {
+      fetchData();
+    }
+  }, [id, router]);
 
   // useeffect Function
   useEffect(() => {
@@ -263,47 +283,74 @@ export default function EditQuotation() {
     }));
   };
 
-  // ✅ Update Submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+// ✅ Update Submit
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const user = getStoredUser();
-    const userId = getUserId(user);
+  try {
+    // Current Logged-in User
+    const meRes = await fetch("/api/me", {
+      cache: "no-store",
+    });
 
-    if (!userId) {
-      Swal.fire("Error ❌", "Unable to find logged-in user.", "error");
-      return;
+    if (!meRes.ok) {
+      throw new Error("Session expired");
     }
 
-    const res = await fetch(
+    const meResult = await meRes.json();
+
+    if (!meResult.success || !meResult.user) {
+      throw new Error("User not found");
+    }
+
+    const userId = meResult.user._id;
+
+    // Update Quotation
+    const response = await fetch(
       `/api/quotation/${id}?userId=${encodeURIComponent(userId)}`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...formData, userId }),
-      },
+        body: JSON.stringify({
+          ...formData,
+          userId,
+        }),
+      }
     );
 
-    const data = await res.json();
+    const result = await response.json();
 
-    if (data.success) {
-      Swal.fire({
-        title: "Updated!",
-        text: "Quotation updated successfully",
-        icon: "success",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-
-      setTimeout(() => {
-        router.push("/quotation/view");
-      }, 1500);
-    } else {
-      Swal.fire("Error ❌", data.message, "error");
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Update failed");
     }
-  };
+
+    Swal.fire({
+      title: "Updated!",
+      text: "Quotation updated successfully.",
+      icon: "success",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+
+    setTimeout(() => {
+      router.push("/quotation/view");
+    }, 1500);
+  } catch (error) {
+    console.error(error);
+
+    Swal.fire(
+      "Error ❌",
+      error.message || "Something went wrong.",
+      "error"
+    );
+
+    if (error.message === "Session expired") {
+      router.push("/login");
+    }
+  }
+};
 
   return (
     <div className="container mt-4">
@@ -335,7 +382,7 @@ export default function EditQuotation() {
                     readOnly
                   />
                 </div>
-                <div className="col-lg-6">
+                {/* <div className="col-lg-6">
                   <label
                     className={styles.labelSize}
                     htmlFor="quotation_company_name"
@@ -350,7 +397,7 @@ export default function EditQuotation() {
                     value={formData.quotation_company_name || ""}
                     onChange={handleChange}
                   />
-                </div>
+                </div> */}
                 <div className="col-lg-4">
                   <label className={styles.labelSize} htmlFor="moving_type">
                     Moving Type (मुविंग के प्रकार)
@@ -371,7 +418,7 @@ export default function EditQuotation() {
                     ))}
                   </select>
                 </div>
-                <div className="col-lg-4">
+                {/* <div className="col-lg-4">
                   <label className={styles.labelSize} htmlFor="company_gst">
                     Company GST No. (कंपनी GST No.)
                   </label>
@@ -425,7 +472,7 @@ export default function EditQuotation() {
                     value={formData.quotation_mobile || ""}
                     onChange={handleChange}
                   />
-                </div>
+                </div> */}
                 <div className="col-lg-4">
                   <label className={styles.labelSize} htmlFor="quotation_date">
                     Quotation Date (तारीख)

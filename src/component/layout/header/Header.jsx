@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "remixicon/fonts/remixicon.css";
-import { getStoredUser, getUserId } from "@/lib/auth";
+
 
 export default function Header({ children }) {
   const router = useRouter();
@@ -16,30 +16,25 @@ export default function Header({ children }) {
   const [search, setSearch] = useState("");
   const [customerData, setCustomerData] = useState([]);
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const user = getStoredUser();
-        const userId = getUserId(user);
+useEffect(() => {
+  const fetchCustomers = async () => {
+    try {
+      const res = await fetch("/api/customer", {
+        cache: "no-store",
+      });
 
-        if (!userId) return;
+      const data = await res.json();
 
-        const res = await fetch(
-          `/api/customer?userId=${encodeURIComponent(userId)}`,
-        );
-
-        const data = await res.json();
-
-        if (res.ok && data.success) {
-          setCustomerData(data.data || []);
-        }
-      } catch (error) {
-        console.error("Customer fetch error:", error);
+      if (res.ok && data.success) {
+        setCustomerData(data.data || []);
       }
-    };
+    } catch (error) {
+      console.error("Customer fetch error:", error);
+    }
+  };
 
-    fetchCustomers();
-  }, []);
+  fetchCustomers();
+}, []);
 
   const filteredCustomers = customerData.filter((customer) =>
     [customer.party_name, customer.mobile, customer.email]
@@ -47,32 +42,28 @@ export default function Header({ children }) {
       .some((field) => field.toLowerCase().includes(search.toLowerCase())),
   );
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const user = getStoredUser();
-        const userId = getUserId(user);
+useEffect(() => {
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch("/api/profile", {
+        cache: "no-store",
+      });
 
-        if (!userId) {
-          setProfile(null);
-          return;
-        }
+      const result = await response.json();
 
-        const response = await fetch(
-          `/api/profile?userId=${encodeURIComponent(userId)}`,
-        );
-        const result = await response.json();
-
-        if (response.ok && result.success && result.data) {
-          setProfile(result.data);
-        }
-      } catch {
+      if (response.ok && result.success && result.data) {
+        setProfile(result.data);
+      } else {
         setProfile(null);
       }
-    };
+    } catch (error) {
+      console.error(error);
+      setProfile(null);
+    }
+  };
 
-    fetchProfile();
-  }, []);
+  fetchProfile();
+}, []);
 
   const companyName = profile?.company_name || "MoveBook";
   const shortCompanyName =

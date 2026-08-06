@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
-import { getStoredUser, getUserId } from "@/lib/auth";
+
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState(null);
@@ -10,40 +10,50 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
 
   
-  useEffect(() => {
-    const parsedUser = getStoredUser();
-    setUser(parsedUser);
+useEffect(() => {
+  const fetchProfile = async () => {
+    try {
+      // Get logged in user
+      const meResponse = await fetch("/api/me", {
+        cache: "no-store",
+      });
 
-    const fetchProfile = async () => {
-      try {
-        let url = "/api/profile";
-        const userId = getUserId(parsedUser);
-
-        if (userId) {
-          url += `?userId=${encodeURIComponent(userId)}`;
-        } else if (parsedUser?.email) {
-          url += `?email=${encodeURIComponent(parsedUser.email)}`;
-        }
-
-        const response = await fetch(url);
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          // if no profile found for this user, that's ok — we'll still show user info
-          setProfile(null);
-          return;
-        }
-
-        setProfile(result.data);
-      } catch (err) {
-        setError(err.message || "Unable to load profile");
-      } finally {
-        setIsLoading(false);
+      if (!meResponse.ok) {
+        setError("Unauthorized");
+        return;
       }
-    };
 
-    fetchProfile();
-  }, []);
+      const meResult = await meResponse.json();
+
+      if (!meResult.success) {
+        setError("Unauthorized");
+        return;
+      }
+
+      setUser(meResult.user);
+
+      // Fetch profile
+      const profileResponse = await fetch("/api/profile", {
+        cache: "no-store",
+      });
+
+      const profileResult = await profileResponse.json();
+
+      if (!profileResponse.ok || !profileResult.success) {
+        setProfile(null);
+        return;
+      }
+
+      setProfile(profileResult.data);
+    } catch (err) {
+      setError(err.message || "Unable to load profile");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchProfile();
+}, []);
 
   const companyInitial =
     (profile?.company_name?.trim()?.charAt(0) || user?.phone?.trim()?.charAt(0))

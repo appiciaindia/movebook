@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
-import { getStoredUser, getUserId } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 const defaultForm = {
@@ -28,11 +27,33 @@ export default function CustomerPage({ mode = "add", customerId = null,onSuccess
 
   const router = useRouter();
 
-  useEffect(() => {
-    const user = getStoredUser();
-    const id = getUserId(user);
-    setUserId(id || "");
-  }, []);
+useEffect(() => {
+  const loadUser = async () => {
+    try {
+      const res = await fetch("/api/me", {
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        setUserId("");
+        return;
+      }
+
+      const result = await res.json();
+
+      if (result.success && result.user) {
+        setUserId(result.user._id);
+      } else {
+        setUserId("");
+      }
+    } catch (error) {
+      console.error("Failed to load user:", error);
+      setUserId("");
+    }
+  };
+
+  loadUser();
+}, []);
 
   useEffect(() => {
     const loadCustomers = async () => {

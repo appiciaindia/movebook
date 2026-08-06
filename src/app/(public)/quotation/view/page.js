@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
-import { getStoredUser, getUserId } from "@/lib/auth";
 import Pagination from "../../../../component/common/pagination/page";
 
 export default function QuotationsPage() {
@@ -16,8 +15,10 @@ export default function QuotationsPage() {
 
   // Fetch Data
   const fetchData = async () => {
-    const user = getStoredUser();
-    const userId = getUserId(user);
+    const resu = await fetch("/api/me");
+    const data = await resu.json();
+
+    const userId = data.user?._id;
 
     if (!userId) return;
 
@@ -61,8 +62,10 @@ export default function QuotationsPage() {
     });
 
     if (confirm.isConfirmed) {
-      const user = getStoredUser();
-      const userId = getUserId(user);
+      const res = await fetch("/api/me");
+      const result = await res.json();
+
+      const userId = result.user?._id;
 
       await fetch(`/api/quotation/${id}?userId=${encodeURIComponent(userId)}`, {
         method: "DELETE",
@@ -122,9 +125,9 @@ export default function QuotationsPage() {
   // Pagination Logic
   const indexOfLast = currentPage * entries;
   const indexOfFirst = indexOfLast - entries;
-const currentData = [...filteredData]
-  .reverse()
-  .slice(indexOfFirst, indexOfLast);
+  const currentData = [...filteredData]
+    .reverse()
+    .slice(indexOfFirst, indexOfLast);
 
   return (
     <div className="container mt-4">

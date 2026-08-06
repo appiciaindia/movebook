@@ -4,7 +4,6 @@ import CustomerPage from "@/component/customer/page";
 import Pagination from "../../../component/common/pagination/page";
 import React from "react";
 import Swal from "sweetalert2";
-import { getStoredUser, getUserId } from "@/lib/auth";
 import styles from "./page.module.css";
 import { useRouter, useParams } from "next/navigation";
 
@@ -27,9 +26,31 @@ function page() {
   }, []);
 
   useEffect(() => {
-    const user = getStoredUser();
-    const id = getUserId(user);
-    setUserId(id || "");
+    const loadUser = async () => {
+      try {
+        const res = await fetch("/api/me", {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          setUserId("");
+          return;
+        }
+
+        const result = await res.json();
+
+        if (result.success && result.user) {
+          setUserId(result.user._id);
+        } else {
+          setUserId("");
+        }
+      } catch (error) {
+        console.error("Failed to load user:", error);
+        setUserId("");
+      }
+    };
+
+    loadUser();
   }, []);
 
   const loadCustomers = async () => {
@@ -55,7 +76,7 @@ function page() {
     if (userId) {
       loadCustomers();
     }
-  }, [userId, searchTerm , refresh]);
+  }, [userId, searchTerm, refresh]);
 
   // Search Filter
   const filteredData = customers.filter(
@@ -67,62 +88,110 @@ function page() {
       item.email?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  // Delete with SweetAlert
-  const handleDelete = async (id) => {
-    const confirm = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to recover this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+// Delete with SweetAlert
+const handleDelete = async (id) => {
+  const confirm = await Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to recover this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!",
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  try {
+    // Logged in user
+    const meRes = await fetch("/api/me", {
+      cache: "no-store",
     });
 
-    if (!confirm.isConfirmed) return;
-
-    try {
-      const user = getStoredUser();
-      const userId = getUserId(user);
-
-      const response = await fetch(
-        `/api/customer/${id}?userId=${encodeURIComponent(userId)}`,
-        {
-          method: "DELETE",
-        },
+    if (!meRes.ok) {
+      Swal.fire(
+        "Session Expired",
+        "Please login again.",
+        "error"
       );
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        setCustomers((prev) => {
-          const updated = prev.filter((item) => item._id !== id);
-
-          const newTotalPages = Math.ceil(updated.length / entries);
-
-          if (currentPage > newTotalPages && newTotalPages > 0) {
-            setCurrentPage(newTotalPages);
-          }
-
-          return updated;
-        });
-
-        Swal.fire("Deleted!", "Customer has been deleted.", "success");
-      } else {
-        Swal.fire("Error!", result.message || "Delete failed.", "error");
-      }
-    } catch (error) {
-      console.error(error);
-      Swal.fire("Error!", "Something went wrong.", "error");
+      router.push("/login");
+      return;
     }
-  };
+
+    const meResult = await meRes.json();
+
+    if (!meResult.success || !meResult.user) {
+      Swal.fire(
+        "Error",
+        "User not found.",
+        "error"
+      );
+      return;
+    }
+
+    const userId = meResult.user._id;
+
+    // Delete customer
+    const response = await fetch(
+      `/api/customer/${id}?userId=${encodeURIComponent(userId)}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      Swal.fire(
+        "Error!",
+        result.message || "Delete failed.",
+        "error"
+      );
+      return;
+    }
+
+    setCustomers((prev) => {
+      const updated = prev.filter(
+        (item) => item._id !== id
+      );
+
+      const newTotalPages = Math.ceil(
+        updated.length / entries
+      );
+
+      if (
+        currentPage > newTotalPages &&
+        newTotalPages > 0
+      ) {
+        setCurrentPage(newTotalPages);
+      }
+
+      return updated;
+    });
+
+    Swal.fire(
+      "Deleted!",
+      "Customer has been deleted.",
+      "success"
+    );
+  } catch (error) {
+    console.error(error);
+
+    Swal.fire(
+      "Error!",
+      "Something went wrong.",
+      "error"
+    );
+  }
+};
 
   // Pagination Logic
   const indexOfLast = currentPage * entries;
   const indexOfFirst = indexOfLast - entries;
 
-const currentData = [...filteredData]
-  .reverse()
-  .slice(indexOfFirst, indexOfLast);
+  const currentData = [...filteredData]
+    .reverse()
+    .slice(indexOfFirst, indexOfLast);
 
   return (
     <div className="container-fluid">
@@ -280,7 +349,7 @@ const currentData = [...filteredData]
       <div
         className={`modal fade ${showCustomerModal ? "show d-block" : ""}`}
         tabIndex="-1"
-         onHide={() => setShowCustomerModal(false)}
+        onHide={() => setShowCustomerModal(false)}
         style={{
           backgroundColor: "rgba(0,0,0,.5)",
           display: showCustomerModal ? "block" : "none",
@@ -300,7 +369,12 @@ const currentData = [...filteredData]
 
             <div className="modal-body">
               <div className="container-fluid ">
-                <CustomerPage setCustomers={setCustomers} mode="add" onSuccess={loadCustomers} onClose={() => setShowCustomerModal(false)} />
+                <CustomerPage
+                  setCustomers={setCustomers}
+                  mode="add"
+                  onSuccess={loadCustomers}
+                  onClose={() => setShowCustomerModal(false)}
+                />
               </div>
             </div>
           </div>
@@ -343,12 +417,12 @@ const currentData = [...filteredData]
         </div>
       </div>
       {/* Pagination UI */}
-    <Pagination
-  currentPage={currentPage}
-  totalItems={filteredData.length}
-  entries={entries}
-  onPageChange={setCurrentPage}
-/>
+      <Pagination
+        currentPage={currentPage}
+        totalItems={filteredData.length}
+        entries={entries}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import styles from "./login.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { clearAuthSession, persistUser } from "@/lib/auth";
+import { getDeviceId } from "@/lib/device";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -21,7 +21,6 @@ export default function LoginPage() {
   useEffect(() => {
     if (step !== "verify") return;
 
-    
     setTimer(60);
     setCanResend(false);
 
@@ -104,37 +103,35 @@ export default function LoginPage() {
 
     setLoading(true);
 
-    const response = await fetch("/api/verify-otp", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        otp: otp.join(""),
-        mode: "login",
-      }),
-    });
-
-    const result = await response.json();
-    setLoading(false);
-
-    if (!result.success) {
-      setMessage(result.message || "OTP verification failed.");
-      return;
-    }
-
     try {
-      if (result.user) {
-        persistUser(result.user);
-      } else {
-        clearAuthSession();
-      }
-    } catch (e) {
-      console.error("Failed to save user session", e);
-    }
+      const response = await fetch("/api/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          otp: otp.join(""),
+          mode: "login",
+           deviceId: getDeviceId(),
+        }),
+      });
 
-    router.push(result.redirectTo || "/dashboard");
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setMessage(result.message || "OTP verification failed.");
+        return;
+      }
+
+      // HttpOnly cookie server se set ho chuki hai
+      router.replace(result.redirectTo || "/dashboard");
+    } catch (error) {
+      console.error(error);
+      setMessage("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resendOtp = async () => {

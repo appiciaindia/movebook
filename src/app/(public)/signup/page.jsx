@@ -4,7 +4,8 @@ import styles from "./page.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { clearAuthSession, persistUser } from "@/lib/auth";
+import { getDeviceId } from "@/lib/device";
+
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -82,6 +83,7 @@ export default function SignUpPage() {
         body: JSON.stringify({
           email,
           mode: "signup",
+         
         }),
       });
 
@@ -107,58 +109,49 @@ export default function SignUpPage() {
     }
   };
 
-  const verifyOtp = async (event) => {
-    event.preventDefault();
-    setMessage("");
+ const verifyOtp = async (event) => {
+  event.preventDefault();
+  setMessage("");
 
-    if (otp.join("").length !== 4) {
-      setMessage("Enter the 4-digit OTP.");
+  if (otp.join("").length !== 4) {
+    setMessage("Enter the 4-digit OTP.");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const response = await fetch("/api/verify-otp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        otp: otp.join(""),
+        mode: "signup",
+          deviceId: getDeviceId(),
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      setMessage(result.message || "OTP verification failed.");
       return;
     }
 
-    setLoading(true);
+    setStep("done");
+    setMessage(result.message || "Signup successful.");
 
-    try {
-      const response = await fetch("/api/verify-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          otp: otp.join(""),
-          mode: "signup",
-        }),
-      });
-
-      const result = await response.json();
-
-      setLoading(false);
-
-      if (!result.success) {
-        setMessage(result.message || "OTP verification failed.");
-        return;
-      }
-
-      try {
-        if (result.user) {
-          persistUser(result.user);
-        } else {
-          clearAuthSession();
-        }
-      } catch (e) {
-        console.error("Failed to save user session", e);
-      }
-
-      setStep("done");
-      setMessage(result.message || "Signup successful.");
-
-      router.push(result.redirectTo || "/register");
-    } catch (error) {
-      setLoading(false);
-      setMessage("Something went wrong.");
-    }
-  };
+    router.push(result.redirectTo || "/register");
+  } catch (error) {
+    console.error(error);
+    setMessage("Something went wrong.");
+  } finally {
+    setLoading(false);
+  }
+};
 
     const resendOtp = async () => {
     setCanResend(false);

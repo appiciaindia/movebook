@@ -1,105 +1,89 @@
 import connectDB from "@/lib/db";
-import Otp from "@/models/Otp";
 import User from "@/models/User";
+import Otp from "@/models/Otp";
+import nodemailer from "nodemailer";
 
 export async function POST(req) {
   try {
+    const { email, mode } = await req.json();
 
-    const { phone, mode } = await req.json();
-
-    if (!phone) {
+    if (!email) {
       return Response.json({
         success: false,
-        message: "Phone number is required",
+        message: "Email is required",
       });
     }
 
     await connectDB();
 
-    // LOGIN FLOW
-    if (mode === "login") {
+    const user = await User.findOne({ email });
 
-      const existingUser = await User.findOne({
-        phone
+    // Login
+    if (mode === "login" && !user) {
+      return Response.json({
+        success: false,
+        redirectTo: "/signup",
+        message: "Account not found.",
       });
-
-      if (!existingUser) {
-
-        return Response.json({
-          success: false,
-          redirectTo: "/signup",
-          message:
-            "Account not found. Please create an account first.",
-        });
-
-      }
-
     }
 
-    // SIGNUP FLOW
-    if (mode === "signup") {
-
-      const existingUser = await User.findOne({
-        phone
+    // Signup
+    if (mode === "signup" && user) {
+      return Response.json({
+        success: false,
+        redirectTo: "/login",
+        message: "Account already exists.",
       });
-
-      if (existingUser) {
-
-        return Response.json({
-          success: false,
-          redirectTo: "/login",
-          message:
-            "Account already exists. Please login.",
-        });
-
-      }
-
     }
 
-    // Remove previous OTP
-    await Otp.deleteMany({
-      phone
-    });
+    // Generate OTP
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
-    const otp = Math.floor(
-      1000 + Math.random() * 9000
-    ).toString();
-
-    const expiresAt = new Date(
-      Date.now() + 5 * 60 * 1000
+    // Save OTP in DB
+    await Otp.findOneAndUpdate(
+      { email },
+      {
+        email,
+        otp,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      },
+      {
+        upsert: true,
+        new: true,
+      },
     );
 
-    await Otp.create({
-      phone,
-      otp,
-      expiresAt
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: false,
+      auth: {
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASSWORD,
+      },
     });
 
-    // OTP provider code
-    // ...
+    await transporter.sendMail({
+      from: `"MoveBook" <${process.env.SMTP_EMAIL}>`,
+      to: email,
+      subject: "Your Login OTP",
+      html: `
+        <h2>Your OTP is</h2>
+        <h1>${otp}</h1>
+        <p>This OTP is valid for 5 minutes.</p>
+      `,
+    });
 
     return Response.json({
-
       success: true,
-
-      message:
-        "OTP sent successfully",
-
+      message: "OTP sent successfully.",
     });
-
-  }
-
-  catch (error) {
+  } catch (error) {
+    console.error(error);
 
     return Response.json({
-
       success: false,
-
-      message:
-        error.message
-
+      message: error.message,
     });
-
   }
-
 }

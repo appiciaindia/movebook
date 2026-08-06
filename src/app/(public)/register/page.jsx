@@ -3,35 +3,53 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { getStoredUser, getUserId } from "@/lib/auth";
+
 
 export default function RegisterPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState("");
 
+  useEffect(() => {
+    const checkProfile = async () => {
+      try {
+        const res = await fetch("/api/me");
 
+        if (!res.ok) {
+          router.replace("/login");
+          return;
+        }
+
+        const { user } = await res.json();
+
+        if (!user) {
+          router.replace("/login");
+          return;
+        }
+
+        // Registration already completed
+        if (user.isProfileCompleted) {
+          router.replace("/dashboard");
+        }
+      } catch {
+        router.replace("/login");
+      }
+    };
+
+    checkProfile();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setIsSubmitting(true);
     setFeedback("");
 
     const form = e.currentTarget;
     const formData = new FormData(form);
-    const user = getStoredUser();
-    const userId = getUserId(user);
-
-    if (!userId) {
-      setFeedback("Session expired. Please login again.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    formData.append("userId", userId);
 
     try {
-      const response = await fetch(`/api/profile?userId=${encodeURIComponent(userId || "")}`, {
+      const response = await fetch("/api/profile", {
         method: "POST",
         body: formData,
       });
@@ -43,8 +61,10 @@ export default function RegisterPage() {
       }
 
       setFeedback("Registration saved successfully.");
+
       form.reset();
-      router.push("/dashboard");
+
+      router.replace(result.redirectTo || "/dashboard");
     } catch (error) {
       setFeedback(error.message || "Registration failed");
     } finally {
@@ -107,7 +127,10 @@ export default function RegisterPage() {
 
                     <div className="col-lg-4">
                       <div className="">
-                        <label htmlFor="email" className="form-label text-muted small">
+                        <label
+                          htmlFor="email"
+                          className="form-label text-muted small"
+                        >
                           Email
                         </label>
                         <input
@@ -158,7 +181,10 @@ export default function RegisterPage() {
                     </div>
                     <div className="col-lg-4">
                       <div className="">
-                        <label htmlFor="website" className="form-label text-muted small">
+                        <label
+                          htmlFor="website"
+                          className="form-label text-muted small"
+                        >
                           Website <span className="text-muted">(Optional)</span>
                         </label>
                         <input
@@ -171,7 +197,10 @@ export default function RegisterPage() {
                       </div>
                     </div>
                     <div className="col-md-4">
-                      <label htmlFor="gst_number" className="form-label text-muted small">
+                      <label
+                        htmlFor="gst_number"
+                        className="form-label text-muted small"
+                      >
                         GSTIN <span className="text-muted">(Optional)</span>
                       </label>
                       <input
@@ -183,7 +212,10 @@ export default function RegisterPage() {
                       />
                     </div>
                     <div className="col-md-4">
-                      <label htmlFor="pan_number" className="form-label text-muted small">
+                      <label
+                        htmlFor="pan_number"
+                        className="form-label text-muted small"
+                      >
                         PAN
                       </label>
                       <input
@@ -197,7 +229,10 @@ export default function RegisterPage() {
                     </div>
                     <div className="col-lg-4">
                       <div className="">
-                        <label htmlFor="company_logo" className="form-label text-muted small">
+                        <label
+                          htmlFor="company_logo"
+                          className="form-label text-muted small"
+                        >
                           Company Logo
                         </label>
                         <input
@@ -212,7 +247,10 @@ export default function RegisterPage() {
                     </div>
                     <div className="col-lg-4">
                       <div className="">
-                        <label htmlFor="pan_card" className="form-label text-muted small">
+                        <label
+                          htmlFor="pan_card"
+                          className="form-label text-muted small"
+                        >
                           Upload PAN Card
                         </label>
                         <input
@@ -227,7 +265,10 @@ export default function RegisterPage() {
                     </div>
                     <div className="col-lg-12">
                       <div>
-                        <label htmlFor="address" className="form-label text-muted small">
+                        <label
+                          htmlFor="address"
+                          className="form-label text-muted small"
+                        >
                           Address
                         </label>
                         <textarea
@@ -242,7 +283,10 @@ export default function RegisterPage() {
                   </div>
 
                   {feedback ? (
-                    <div className="alert alert-info text-center mb-3" role="status">
+                    <div
+                      className="alert alert-info text-center mb-3"
+                      role="status"
+                    >
                       {feedback}
                     </div>
                   ) : null}

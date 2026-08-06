@@ -24,14 +24,14 @@ export async function POST(req) {
           success: false,
           message: "Email and OTP are required.",
         },
-        { status: 400 }
+        {
+          status: 400,
+        },
       );
     }
 
-    const deviceId =
-      body.deviceId ||
-      req.headers.get("user-agent") ||
-      uuid();
+    // Device Id
+    const deviceId = body.deviceId || req.headers.get("user-agent") || uuid();
 
     // OTP
     const otpDoc = await OTP.findOne({
@@ -55,7 +55,7 @@ export async function POST(req) {
     if (new Date() > otpDoc.expiresAt) {
       return NextResponse.json({
         success: false,
-        message: "OTP expired.",
+        message: "OTP has expired.",
       });
     }
 
@@ -63,10 +63,7 @@ export async function POST(req) {
       email: email.toLowerCase(),
     });
 
-    // =========================
-    // SIGNUP
-    // =========================
-
+    // Signup
     if (mode === "signup") {
       if (!user) {
         user = await User.create({
@@ -78,12 +75,18 @@ export async function POST(req) {
         user.isVerified = true;
         await user.save();
       }
+
+      await OTP.deleteOne({
+        _id: otpDoc._id,
+      });
+
+      return NextResponse.json({
+        success: true,
+        redirectTo: "/register",
+      });
     }
 
-    // =========================
-    // LOGIN
-    // =========================
-
+    // Login
     if (mode === "login") {
       if (!user) {
         return NextResponse.json({
@@ -92,10 +95,11 @@ export async function POST(req) {
         });
       }
 
+      // User must complete registration first
       if (!user.isProfileCompleted) {
         return NextResponse.json({
           success: false,
-          message: "Please complete your registration first.",
+          message: "Please Create Your Account.",
           redirectTo: "/signup",
         });
       }
@@ -104,24 +108,20 @@ export async function POST(req) {
       await user.save();
     }
 
-    // =========================
-    // SESSION
-    // =========================
-
+    // Remove old session of same device
     await Session.deleteOne({
       userId: user._id,
       deviceId,
     });
 
+    // Active Sessions
     const sessions = await Session.find({
       userId: user._id,
     }).sort({
       createdAt: 1,
     });
 
-    const maxDevice = Number(
-      process.env.MAX_DEVICE_LOGIN || 3
-    );
+    const maxDevice = Number(process.env.MAX_DEVICE_LOGIN || 3);
 
     if (sessions.length >= maxDevice) {
       await Session.deleteOne({
@@ -129,23 +129,19 @@ export async function POST(req) {
       });
     }
 
-    // =========================
     // JWT
-    // =========================
-
     const jti = uuid();
 
     const token = await createAccessToken(user, jti);
 
+    // Save Session
     await Session.create({
       userId: user._id,
       jti,
       deviceId,
       ip: req.headers.get("x-forwarded-for") || "",
       browser: req.headers.get("user-agent") || "",
-      expiresAt: new Date(
-        Date.now() + 7 * 24 * 60 * 60 * 1000
-      ),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
     // Delete OTP
@@ -156,19 +152,12 @@ export async function POST(req) {
     // Cookie
     const cookieStore = await cookies();
 
-    cookieStore.set(
-      ACCESS_TOKEN,
-      token,
-      COOKIE_OPTIONS
-    );
+    cookieStore.set(ACCESS_TOKEN, token, COOKIE_OPTIONS);
 
     return NextResponse.json({
       success: true,
       message: "OTP verified successfully.",
-      redirectTo:
-        mode === "signup"
-          ? "/register"
-          : "/dashboard",
+      redirectTo: mode === "signup" ? "/register" : "/dashboard",
     });
   } catch (error) {
     console.error(error);
@@ -180,7 +169,7 @@ export async function POST(req) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }

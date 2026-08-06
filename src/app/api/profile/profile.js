@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
-import cloudinary from "@/lib/cloudinary";
-import { uploadToCloudinary } from "@/lib/uploadToCloudinary";
 import connectDB from "@/lib/db";
 import Profile from "@/models/Profile";
 import { getCurrentUser } from "@/lib/auth";
-import User from "@/models/User";
 import fs from "fs";
 import path from "path";
 import sharp from "sharp";
@@ -54,7 +51,10 @@ async function getThemeColor(imagePath) {
         const [r, g, b] = key.split(",").map(Number);
 
         dominant =
-          "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
+          "#" +
+          [r, g, b]
+            .map((v) => v.toString(16).padStart(2, "0"))
+            .join("");
       }
     }
 
@@ -63,6 +63,45 @@ async function getThemeColor(imagePath) {
     console.error(err);
     return "#000671";
   }
+}
+
+export async function requireUserId() {
+  const authUser = await getCurrentUser();
+
+  if (!authUser) {
+    return null;
+  }
+
+  return authUser.userId;
+}
+
+function getCookieValue(cookieHeader, name) {
+  if (!cookieHeader) {
+    return null;
+  }
+
+  const cookie = cookieHeader
+    .split(";")
+    .map((entry) => entry.trim())
+    .find((entry) => entry.startsWith(`${name}=`));
+
+  if (!cookie) {
+    return null;
+  }
+
+  return decodeURIComponent(cookie.substring(name.length + 1));
+}
+
+function resolveUserId(req, formData, url) {
+  const queryUserId = requireUserId(url);
+  const formUserId = formData?.get?.("userId");
+  const cookieUserId = getCookieValue(req.headers.get("cookie") || "", "auth_user");
+
+  const resolvedValue = [formUserId, queryUserId, cookieUserId].find((value) => {
+    return typeof value === "string" && value.trim().length > 0;
+  });
+
+  return resolvedValue ? resolvedValue.toString().trim() : null;
 }
 
 const requiredRegistrationFields = [
@@ -113,7 +152,7 @@ function safeUploadName(fileName) {
 
 function validateRegistration(data, body) {
   const isRegisterSubmit = requiredRegistrationFiles.some(([key]) =>
-    data.has(key),
+    data.has(key)
   );
 
   if (!isRegisterSubmit) {
@@ -155,10 +194,7 @@ function normalizeBody(body) {
   }
 }
 
-function validateProfileFields(
-  body,
-  requiredFields = requiredRegistrationFields,
-) {
+function validateProfileFields(body, requiredFields = requiredRegistrationFields) {
   const errors = [];
 
   requiredFields.forEach(([key, label]) => {
@@ -197,10 +233,7 @@ function validateProfileFields(
     errors.push("Enter a valid IFSC Code");
   }
 
-  if (
-    hasValue(body.account_number) &&
-    !accountPattern.test(body.account_number)
-  ) {
+  if (hasValue(body.account_number) && !accountPattern.test(body.account_number)) {
     errors.push("Enter a valid Account Number");
   }
 
@@ -219,7 +252,7 @@ function validationResponse(errors) {
       success: false,
       message: errors.join(", "),
     },
-    { status: 400 },
+    { status: 400 }
   );
 }
 
@@ -238,23 +271,19 @@ export async function GET(req) {
   try {
     await connectDB();
 
-    const authUser = await getCurrentUser();
+    const url = new URL(req.url);
+    const email = url.searchParams.get("email");
+    const userId = resolveUserId(req, null, url);
 
-    if (!authUser) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Unauthorized",
-        },
-        {
-          status: 401,
-        },
-      );
+    let data;
+
+    if (userId) {
+      data = await Profile.findOne({ userId });
+    } else if (email) {
+      data = await Profile.findOne({ email: email.toLowerCase() });
+    } else {
+      data = await Profile.findOne().sort({ createdAt: -1 });
     }
-
-    const data = await Profile.findOne({
-      userId: authUser.userId,
-    });
 
     return NextResponse.json({
       success: true,
@@ -266,9 +295,7 @@ export async function GET(req) {
         success: false,
         message: error.message,
       },
-      {
-        status: 500,
-      },
+      { status: 500 }
     );
   }
 }
@@ -276,20 +303,6 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     await connectDB();
-
-    const authUser = await getCurrentUser();
-
-    if (!authUser) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Unauthorized",
-        },
-        {
-          status: 401,
-        },
-      );
-    }
 
     const data = await req.formData();
     const body = {};
@@ -304,7 +317,7 @@ export async function POST(req) {
 
     if (missingFields.length > 0) {
       return validationResponse(
-        missingFields.map((field) => `${field} is required`),
+        missingFields.map((field) => `${field} is required`)
       );
     }
 
@@ -324,13 +337,17 @@ export async function POST(req) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    if (hasFile(logoFile)) {
-      body.company_logo = await saveUpload(logoFile, uploadDir);
+   if (hasFile(logoFile)) {
+  body.company_logo = await saveUpload(logoFile, uploadDir);
 
-      const logoPath = path.join(process.cwd(), "public", body.company_logo);
+  const logoPath = path.join(
+    process.cwd(),
+    "public",
+    body.company_logo
+  );
 
-      body.theme_color = await getThemeColor(logoPath);
-    }
+  body.theme_color = await getThemeColor(logoPath);
+}
 
     if (hasFile(panCardFile)) {
       body.pan_card = await saveUpload(panCardFile, uploadDir);
@@ -340,46 +357,45 @@ export async function POST(req) {
       body.signature = await saveUpload(signFile, uploadDir);
     }
 
-    // JWT User
-    body.userId = authUser.userId;
+    const url = new URL(req.url);
+    const userId = resolveUserId(req, data, url);
 
-    // Save Profile
+    if (!userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "User ID is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    body.userId = userId;
+
     const updatedProfile = await Profile.findOneAndUpdate(
-      { userId: authUser.userId },
-      {
-        $set: body,
-      },
+      { userId },
+      { $set: body },
       {
         new: true,
         upsert: true,
         runValidators: true,
         setDefaultsOnInsert: true,
         strict: false,
-      },
+      }
     );
-
-    // Update User
-    await User.findByIdAndUpdate(authUser.userId, {
-      isProfileCompleted: true,
-    });
 
     return NextResponse.json({
       success: true,
       message: "Profile saved successfully",
-      redirectTo: "/dashboard",
       data: updatedProfile,
     });
   } catch (error) {
-    console.error(error);
-
     return NextResponse.json(
       {
         success: false,
         message: error.message,
       },
-      {
-        status: 500,
-      },
+      { status: 500 }
     );
   }
 }
@@ -387,20 +403,6 @@ export async function POST(req) {
 export async function PUT(req) {
   try {
     await connectDB();
-
-    const authUser = await getCurrentUser();
-
-    if (!authUser) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Unauthorized",
-        },
-        {
-          status: 401,
-        },
-      );
-    }
 
     const data = await req.formData();
     const body = {};
@@ -427,13 +429,17 @@ export async function PUT(req) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    if (hasFile(logoFile)) {
-      body.company_logo = await saveUpload(logoFile, uploadDir);
+ if (hasFile(logoFile)) {
+  body.company_logo = await saveUpload(logoFile, uploadDir);
 
-      const logoPath = path.join(process.cwd(), "public", body.company_logo);
+  const logoPath = path.join(
+    process.cwd(),
+    "public",
+    body.company_logo
+  );
 
-      body.theme_color = await getThemeColor(logoPath);
-    }
+  body.theme_color = await getThemeColor(logoPath);
+}
 
     if (hasFile(panCardFile)) {
       body.pan_card = await saveUpload(panCardFile, uploadDir);
@@ -443,41 +449,44 @@ export async function PUT(req) {
       body.signature = await saveUpload(signFile, uploadDir);
     }
 
-    // JWT User
-    body.userId = authUser.userId;
+    const url = new URL(req.url);
+    const userId = resolveUserId(req, data, url);
 
-   const updated = await Profile.findOneAndUpdate(
-  { userId: authUser.userId },
-  {
-    $set: body,
-  },
-  {
-    new: true,
-    runValidators: true,
-    strict: false,
-  }
-);
+    if (!userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "User ID is required",
+        },
+        { status: 400 }
+      );
+    }
 
-await User.findByIdAndUpdate(authUser.userId, {
-  isProfileCompleted: true,
-});
+    body.userId = userId;
+
+    const updated = await Profile.findOneAndUpdate(
+      { userId },
+      { $set: body },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+        setDefaultsOnInsert: true,
+        strict: false,
+      }
+    );
 
     return NextResponse.json({
       success: true,
-      message: "Profile updated successfully",
       data: updated,
     });
   } catch (error) {
-    console.error(error);
-
     return NextResponse.json(
       {
         success: false,
         message: error.message,
       },
-      {
-        status: 500,
-      },
+      { status: 500 }
     );
   }
 }

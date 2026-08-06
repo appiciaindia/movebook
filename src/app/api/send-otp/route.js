@@ -1,59 +1,24 @@
+import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import User from "@/models/User";
-import Otp from "@/models/Otp";
+import OTP from "@/models/Otp";
 import nodemailer from "nodemailer";
 
 export async function POST(req) {
-  try {
-    const { email, mode } = await req.json();
+  await connectDB();
 
-    if (!email) {
-      return Response.json({
-        success: false,
-        message: "Email is required",
-      });
-    }
+  const { email } = await req.json();
 
-    await connectDB();
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
-    const user = await User.findOne({ email });
+  await OTP.deleteMany({ email });
 
-    // Login
-    if (mode === "login" && !user) {
-      return Response.json({
-        success: false,
-        redirectTo: "/signup",
-        message: "Account not found.",
-      });
-    }
+  await OTP.create({
+    email,
+    otp,
+    expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+  });
 
-    // Signup
-    if (mode === "signup" && user) {
-      return Response.json({
-        success: false,
-        redirectTo: "/login",
-        message: "Account already exists.",
-      });
-    }
-
-    // Generate OTP
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
-
-    // Save OTP in DB
-    await Otp.findOneAndUpdate(
-      { email },
-      {
-        email,
-        otp,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-      },
-      {
-        upsert: true,
-        new: true,
-      },
-    );
-
-    const transporter = nodemailer.createTransport({
+   const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT),
       secure: false,
@@ -74,16 +39,10 @@ export async function POST(req) {
       `,
     });
 
-    return Response.json({
-      success: true,
-      message: "OTP sent successfully.",
-    });
-  } catch (error) {
-    console.error(error);
+  console.log("OTP:", otp);
 
-    return Response.json({
-      success: false,
-      message: error.message,
-    });
-  }
+  return NextResponse.json({
+    success: true,
+    message: "OTP Sent",
+  });
 }

@@ -3,7 +3,6 @@ import React from "react";
 import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 import Swal from "sweetalert2";
-import { getStoredUser, getUserId } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import CustomerPage from "@/component/customer/page";
 import Select from "react-select";
@@ -233,8 +232,10 @@ export default function Quotation() {
   // Use effect Function
   useEffect(() => {
     const getQuotationNo = async () => {
-      const user = getStoredUser();
-      const userId = getUserId(user);
+      const res = await fetch("/api/me");
+      const result = await res.json();
+
+      const userId = result.user?._id;
 
       if (!userId) return;
 
@@ -303,8 +304,10 @@ export default function Quotation() {
   //customer change function
 
   const loadCustomers = async () => {
-    const user = getStoredUser();
-    const userId = getUserId(user);
+    const res = await fetch("/api/me");
+    const result = await res.json();
+
+    const userId = result.user?._id;
 
     if (!userId) return;
 
@@ -401,8 +404,10 @@ export default function Quotation() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const user = getStoredUser();
-    const userId = getUserId(user);
+    const resu = await fetch("/api/me");
+    const result = await resu.json();
+
+    const userId = result.user?._id;
 
     if (!userId) {
       Swal.fire({
@@ -499,6 +504,7 @@ export default function Quotation() {
                           options={customerOptions}
                           value={selectedCustomer}
                           onChange={handleCustomerChange}
+                          required
                           getOptionLabel={(option) => option.label}
                           formatOptionLabel={(option, { context }) =>
                             context === "menu" ? (
@@ -532,7 +538,7 @@ export default function Quotation() {
                       </button>
                     </div>
                   </div>
-                  <div className="col-lg-6">
+                  {/* <div className="col-lg-6">
                     <label
                       className={styles.labelSize}
                       htmlFor="quotation_company_name"
@@ -547,7 +553,7 @@ export default function Quotation() {
                       value={formData.quotation_company_name}
                       onChange={handleChange}
                     />
-                  </div>
+                  </div> */}
                   <div className="col-lg-4">
                     <label className={styles.labelSize} htmlFor="moving_type">
                       Moving Type (मुविंग के प्रकार)
@@ -567,7 +573,7 @@ export default function Quotation() {
                       ))}
                     </select>
                   </div>
-                  <div className="col-lg-4">
+                  {/* <div className="col-lg-4">
                     <label className={styles.labelSize} htmlFor="company_gst">
                       Company GST No. (कंपनी GST No.)
                     </label>
@@ -624,7 +630,7 @@ export default function Quotation() {
                       value={formData.quotation_mobile}
                       onChange={handleChange}
                     />
-                  </div>
+                  </div> */}
                   <div className="col-lg-4">
                     <label
                       className={styles.labelSize}
@@ -954,7 +960,7 @@ export default function Quotation() {
                       onChange={handleChange}
                     />
                   </div>
-                 
+
                   <div className="col-lg-4">
                     <label
                       className={styles.labelSize}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getStoredUser, getUserId } from "@/lib/auth";
+
 import CustomerPage from "@/component/customer/page";
 import Pagination from "../../../../../component/common/pagination/page";
 import Link from "next/link";
@@ -11,9 +11,6 @@ import Swal from "sweetalert2";
 export default function CustomerViewPage() {
   const { id } = useParams();
   const router = useRouter();
-
-  const user = getStoredUser();
-  const userId = getUserId(user);
 
   const [customer, setCustomer] = useState(null);
   const [customers, setCustomers] = useState([]);
@@ -62,8 +59,10 @@ export default function CustomerViewPage() {
 
   //  Quotation Load In ui
   const loadQuotations = async () => {
-    const user = getStoredUser();
-    const userId = getUserId(user);
+    const res = await fetch("/api/me");
+    const result = await res.json();
+
+    const userId = result.user?._id;
 
     if (!id || !userId) return;
 
@@ -129,8 +128,10 @@ export default function CustomerViewPage() {
     });
 
     if (confirm.isConfirmed) {
-      const user = getStoredUser();
-      const userId = getUserId(user);
+      const res = await fetch("/api/me");
+      const result = await res.json();
+
+      const userId = result.user?._id;
 
       await fetch(`/api/quotation/${id}?userId=${encodeURIComponent(userId)}`, {
         method: "DELETE",
@@ -154,9 +155,9 @@ export default function CustomerViewPage() {
   // Pagination Logic
   const indexOfLast = currentPage * entries;
   const indexOfFirst = indexOfLast - entries;
-const currentData = [...filteredData]
-  .reverse()
-  .slice(indexOfFirst, indexOfLast);
+  const currentData = [...filteredData]
+    .reverse()
+    .slice(indexOfFirst, indexOfLast);
 
   // Tabs Active
   useEffect(() => {

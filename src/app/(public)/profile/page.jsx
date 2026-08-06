@@ -2,8 +2,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
-import { clearAuthSession, getStoredUser, getUserId } from "@/lib/auth";
-
 
 const defaultForm = {
   full_name: "",
@@ -74,29 +72,34 @@ export default function ProfilePage() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
-  
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const user = getStoredUser();
-        const userId = getUserId(user);
+        const response = await fetch("/api/profile", {
+          cache: "no-store",
+        });
 
-        if (!userId) {
-          setMessage("User not found. Please login again.");
+        const result = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            setMessage("Please login again.");
+            return;
+          }
+
+          setMessage(result.message || "Profile load failed.");
           return;
         }
 
-        const response = await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`);
-        const result = await response.json();
-
-        if (response.ok && result.success && result.data) {
+        if (result.success && result.data) {
           setFormData(toForm(result.data));
           setLogoPreview(result.data.company_logo || "");
           setPanCardPreview(result.data.pan_card || "");
           setSignaturePreview(result.data.signature || "");
         }
-      } catch {
+      } catch (error) {
+        console.error(error);
         setMessage("Profile load failed.");
       }
     };
@@ -136,59 +139,65 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setIsSaving(true);
-    setMessage("");
+const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    const form = new FormData();
+  setIsSaving(true);
+  setMessage("");
 
-    Object.entries(formData).forEach(([key, value]) => {
+  const form = new FormData();
+
+  Object.entries(formData).forEach(([key, value]) => {
+    form.append(key, value);
+  });
+
+  Object.entries(files).forEach(([key, value]) => {
+    if (value) {
       form.append(key, value);
-    });
-
-    Object.entries(files).forEach(([key, value]) => {
-      if (value) {
-        form.append(key, value);
-      }
-    });
-
-    try {
-      const user = getStoredUser();
-      const userId = getUserId(user);
-
-      if (!userId) {
-        throw new Error("User not found. Please login again.");
-      }
-
-      form.append("userId", userId);
-
-      const response = await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`, {
-        method: "PUT",
-        body: form,
-      });
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || "Profile update failed");
-      }
-
-      setFormData(toForm(result.data));
-      setLogoPreview(result.data.company_logo || "");
-      setPanCardPreview(result.data.pan_card || "");
-      setSignaturePreview(result.data.signature || "");
-      setFiles({ company_logo: null, pan_card: null, signature: null });
-      setMessage("Profile saved successfully.");
-    } catch (error) {
-      setMessage(error.message || "Profile update failed");
-    } finally {
-      setIsSaving(false);
     }
-  };
+  });
 
-  const handleLogout = () => {
-    clearAuthSession();
-    router.push("/login");
+  try {
+    const response = await fetch("/api/profile", {
+      method: "PUT",
+      body: form,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Profile update failed");
+    }
+
+    setFormData(toForm(result.data));
+    setLogoPreview(result.data.company_logo || "");
+    setPanCardPreview(result.data.pan_card || "");
+    setSignaturePreview(result.data.signature || "");
+
+    setFiles({
+      company_logo: null,
+      pan_card: null,
+      signature: null,
+    });
+
+    setMessage("Profile saved successfully.");
+  } catch (error) {
+    setMessage(error.message || "Profile update failed");
+  } finally {
+    setIsSaving(false);
+  }
+};
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", {
+        method: "POST",
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      router.replace("/login");
+      router.refresh();
+    }
   };
 
   return (

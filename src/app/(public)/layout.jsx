@@ -3,92 +3,83 @@
 import { usePathname, useRouter } from "next/navigation";
 import Header from "../../component/layout/header/Header";
 import { useEffect, useState } from "react";
-import { getStoredUser, getUserId, isAuthenticated } from "@/lib/auth";
 
 export default function PublicLayout({ children }) {
-
   const pathname = usePathname();
   const router = useRouter();
 
   const [checked, setChecked] = useState(false);
 
-  // Guest only routes
+  // Routes accessible without login
   const guestRoutes = [
     "/",
     "/login",
     "/signup",
-  ];
-
-  // Authenticated but profile incomplete route
-  const onboardingRoutes = [
     "/register",
   ];
 
   useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/me", {
+          method: "GET",
+          cache: "no-store",
+        });
 
-    const user = getStoredUser();
+        let user = null;
 
-    const userId = getUserId(user);
+        if (res.ok) {
+          const result = await res.json();
 
-    // Not logged in
-    if (!userId) {
+          if (result.success) {
+            user = result.user;
+          }
+        }
 
-      if (
-        !guestRoutes.includes(pathname)
-      ) {
+        // User NOT logged in
+        if (!user) {
+          if (!guestRoutes.includes(pathname)) {
+            router.replace("/login");
+            return;
+          }
+        }
+        // User logged in
+        else {
+          if (
+            pathname === "/" ||
+            pathname === "/login" ||
+            pathname === "/signup"
+          ) {
+            router.replace("/dashboard");
+            return;
+          }
+        }
 
-        router.replace("/login");
+        setChecked(true);
+      } catch (error) {
+        console.error("Auth check failed:", error);
 
-        return;
+        if (!guestRoutes.includes(pathname)) {
+          router.replace("/login");
+          return;
+        }
+
+        setChecked(true);
       }
+    };
 
-    }
-
-    // Logged in users should not visit login/signup
-    else {
-
-      if (
-        guestRoutes.includes(pathname)
-      ) {
-
-        router.replace("/dashboard");
-
-        return;
-      }
-
-    }
-
-    setChecked(true);
-
+    checkAuth();
   }, [pathname, router]);
 
   if (!checked) {
     return null;
   }
 
-  // Guest pages without header
-  if (
-    guestRoutes.includes(pathname)
-  ) {
-
+  // Login / Signup / Register pages
+  if (guestRoutes.includes(pathname)) {
     return <>{children}</>;
-
   }
 
-  // Register page without header
-  if (
-    onboardingRoutes.includes(pathname)
-  ) {
-
-    return <>{children}</>;
-
-  }
-
-  // Protected pages with header
-  return (
-    <Header>
-      {children}
-    </Header>
-  );
-
+  // Protected pages
+  return <Header>{children}</Header>;
 }
