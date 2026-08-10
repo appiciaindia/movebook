@@ -1,5 +1,5 @@
 "use client";
-
+import styles from "./page.module.css";
 export default function Pagination({
   currentPage,
   totalItems,
@@ -14,7 +14,8 @@ export default function Pagination({
   const indexOfFirst = indexOfLast - entries;
 
   return (
-    <div className="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+  <div className={styles.paginationContainer}>
+      <div className="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
       <div>
         Showing {totalItems === 0 ? 0 : indexOfFirst + 1} to{" "}
         {Math.min(indexOfLast, totalItems)} of {totalItems} entries
@@ -42,5 +43,6 @@ export default function Pagination({
         </button>
       </div>
     </div>
+  </div>
   );
 }

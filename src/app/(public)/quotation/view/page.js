@@ -4,12 +4,16 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import Pagination from "../../../../component/common/pagination/page";
+import { PiGreaterThanBold } from "react-icons/pi";
 
 export default function QuotationsPage() {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
   const [entries, setEntries] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [quotationData, setQuotationData] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
 
   const router = useRouter();
 
@@ -122,6 +126,64 @@ export default function QuotationsPage() {
     }
   };
 
+  const handleExport = () => {
+    if (!filteredData || filteredData.length === 0) {
+      alert("No quotation data available to export.");
+      return;
+    }
+
+    const headers = [
+      "Quotation No.",
+      "Party Name",
+      "Company",
+      "Mobile",
+      "Email",
+      "City",
+      "Amount",
+      "Status",
+      "Date",
+    ];
+
+    const rows = filteredData.map((item) => [
+      item.quotation_number || "",
+      item.party_name || "",
+      item.quotation_company_name || "",
+      item.quotation_mobile || "",
+      item.quotation_email || "",
+      item.origin_city || "",
+      Number(item.grand_total ?? item.total_amount ?? item.amount ?? 0).toFixed(
+        2,
+      ),
+      item.status || "Pending",
+      item.createdAt
+        ? new Date(item.createdAt).toLocaleDateString("en-IN")
+        : "",
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) =>
+        row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","),
+      )
+      .join("\n");
+
+    const blob = new Blob(["\ufeff" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `quotations-${new Date().toISOString().slice(0, 10)}.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // Pagination Logic
   const indexOfLast = currentPage * entries;
   const indexOfFirst = indexOfLast - entries;
@@ -132,140 +194,558 @@ export default function QuotationsPage() {
   return (
     <div className="container mt-4">
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>All Quotations</h4>
-        <Link href="/quotation/add" className="btn btn-primary">
-          + New
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+          <h4 className="mb-1">All Quotations</h4>
+
+          <p className="text-muted small mb-0">
+            Dashboard <PiGreaterThanBold size={10} /> Quotations
+          </p>
+        </div>
+
+        <Link
+          href="/quotation/add"
+          className="btn btn-primary d-flex align-items-center gap-2 px-3"
+          style={{
+            height: "42px",
+            borderRadius: "8px",
+          }}
+        >
+          <i className="ri-add-line"></i>
+          New Quotation
         </Link>
       </div>
 
-      {/* Search + Entries */}
-      <div className="d-flex justify-content-between mb-3">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="form-control w-25"
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* Quotation Statistics */}
+      <div className="row g-3 mb-4">
+        {/* Total */}
+        <div className="col-xl-3 col-md-3 col-6">
+          <div
+            className="bg-white h-100 p-2 p-lg-3"
+            style={{
+              border: "1px solid #e9ecef",
+              borderRadius: "12px",
+            }}
+          >
+            <div className="d-flex align-items-center justify-content-between">
+              <div
+                className="d-flex align-items-center justify-content-center"
+                style={{
+                  width: "46px",
+                  height: "46px",
+                  borderRadius: "10px",
+                  background: "#eef2ff",
+                  color: "#4f46e5",
+                }}
+              >
+                <i className="ri-file-list-3-line fs-4"></i>
+              </div>
+              <div className="text-center text-lg-start">
+                <p className="text-muted small mb-1">Total Quotations</p>
 
-        <select
-          className="form-select w-25"
-          value={entries}
-          onChange={(e) => {
-            setEntries(Number(e.target.value));
-            setCurrentPage(1);
-          }}
-        >
-          <option value={10}>10 Entries</option>
-          <option value={25}>25 Entries</option>
-          <option value={50}>50 Entries</option>
-        </select>
+                <h4 className="fw-bold mb-0">{quotationData.length}</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Draft */}
+        <div className="col-xl-3 col-md-3 col-6">
+          <div
+            className="bg-white h-100 p-2 p-lg-3"
+            style={{
+              border: "1px solid #e9ecef",
+              borderRadius: "12px",
+            }}
+          >
+            <div className="d-flex align-items-center justify-content-between">
+              <div
+                className="d-flex align-items-center justify-content-center"
+                style={{
+                  width: "46px",
+                  height: "46px",
+                  borderRadius: "10px",
+                  background: "#f1f5f9",
+                  color: "#64748b",
+                }}
+              >
+                <i className="ri-draft-line fs-4"></i>
+              </div>
+              <div className="text-center text-lg-start">
+                <p className="text-muted small mb-1">Draft Quotations</p>
+
+                <h4 className="fw-bold mb-0">
+                  {
+                    quotationData.filter(
+                      (item) => item.status?.toLowerCase() === "draft",
+                    ).length
+                  }
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sent */}
+        <div className="col-xl-3 col-md-3 col-6">
+          <div
+            className="bg-white h-100 p-2 p-lg-3"
+            style={{
+              border: "1px solid #e9ecef",
+              borderRadius: "12px",
+            }}
+          >
+            <div className="d-flex align-items-center justify-content-between">
+              <div
+                className="d-flex align-items-center justify-content-center"
+                style={{
+                  width: "46px",
+                  height: "46px",
+                  borderRadius: "10px",
+                  background: "#eff6ff",
+                  color: "#2563eb",
+                }}
+              >
+                <i className="ri-send-plane-line fs-4"></i>
+              </div>
+              <div className="text-center text-lg-start">
+                <p className="text-muted small mb-1">Sent Quotations</p>
+
+                <h4 className="fw-bold mb-0">
+                  {
+                    quotationData.filter(
+                      (item) => item.status?.toLowerCase() === "sent",
+                    ).length
+                  }
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Approved */}
+        <div className="col-xl-3 col-md-3 col-6">
+          <div
+            className="bg-white h-100 p-2 p-lg-2"
+            style={{
+              border: "1px solid #e9ecef",
+              borderRadius: "12px",
+            }}
+          >
+            <div className="d-flex align-items-center justify-content-between">
+              <div
+                className="d-flex align-items-center justify-content-center"
+                style={{
+                  width: "46px",
+                  height: "46px",
+                  borderRadius: "10px",
+                  background: "#ecfdf3",
+                  color: "#16a34a",
+                }}
+              >
+                <i className="ri-checkbox-circle-line fs-4"></i>
+              </div>
+              <div className="text-center text-lg-start">
+                <p className="text-muted small mb-1">Approved Quotations</p>
+
+                <h4 className="fw-bold mb-0">
+                  {
+                    quotationData.filter(
+                      (item) => item.status?.toLowerCase() === "approved",
+                    ).length
+                  }
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="">
-        <table className="table table-light table-hover">
-          <thead className="">
-            <tr>
-              <th>#</th>
-              <th>Quotation Number</th>
-              <th>Party Name</th>
-              <th>Company Name</th>
-              <th>Mobile Number</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+      {/* Search & Filters */}
+      <div
+        className="p-3 mb-4"
+        style={{
+          background: "#fff",
+          border: "1px solid #e9ecef",
+          borderRadius: "12px",
+        }}
+      >
+        <div className="row align-items-center g-4">
+          {/* Search */}
+          <div className="col-xl-4 col-lg-4 col-md-6">
+            <div className="position-relative">
+              <i
+                className="ri-search-line position-absolute"
+                style={{
+                  left: "14px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#8a94a6",
+                  fontSize: "18px",
+                  zIndex: 2,
+                }}
+              />
 
-          <tbody className="table-group-divider">
-            {currentData.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="text-center">
-                  No Data Found
-                </td>
-              </tr>
-            ) : (
-              currentData.map((item, index) => (
-                <tr key={item._id}>
-                  <td>{indexOfFirst + index + 1}</td>
-                  <td>{item.quotation_number}</td>
-                  <td>{item.party_name}</td>
-                  <td>{item.quotation_company_name}</td>
-                  <td>{item.quotation_mobile}</td>
+              <input
+                type="text"
+                placeholder="Search quotation, customer, company..."
+                className="form-control ps-5"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
+                style={{
+                  height: "35px",
+                  borderRadius: "8px",
+                }}
+              />
+            </div>
+          </div>
 
-                  <td>
-                    <div className="dropdown">
-                      <button
-                        className="btn btn-light btn-sm border-0"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                      >
-                        <i className="ri-more-2-fill fs-5"></i>
-                      </button>
+          {/* Status */}
+          <div className="col-xl-2 col-lg-2 col-md-6">
+            <select
+              className="form-select"
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              style={{
+                height: "35px",
+                borderRadius: "8px",
+              }}
+            >
+              <option value="">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
 
-                      <ul className="dropdown-menu dropdown-menu-end shadow">
-                        <li>
-                          <Link
-                            href={`/quotation/edit/${item._id}`}
-                            className="dropdown-item"
-                          >
-                            <i className="ri-edit-line me-2"></i>
-                            Edit
-                          </Link>
-                        </li>
+          {/* City */}
+          <div className="col-xl-2 col-lg-2 col-md-6">
+            <select
+              className="form-select"
+              value={cityFilter}
+              onChange={(e) => {
+                setCityFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              style={{
+                height: "35px",
+                borderRadius: "8px",
+              }}
+            >
+              <option value="">All Cities</option>
 
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() =>
-                              window.open(`/api/pdf/${item._id}`, "_blank")
-                            }
-                          >
-                            <i className="ri-file-pdf-line me-2"></i>
-                            PDF
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => handleEmail(item)}
-                          >
-                            <i className="ri-mail-line me-2"></i>
-                            Email
-                          </button>
-                        </li>
+              {[
+                ...new Set(
+                  quotationData.map((item) => item.origin_city).filter(Boolean),
+                ),
+              ].map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
 
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => handleWhatsapp(item)}
-                          >
-                            <i className="ri-whatsapp-line me-2 text-success"></i>
-                            WhatsApp
-                          </button>
-                        </li>
+          {/* Entries */}
+          <div className="col-xl-2 col-lg-2 col-md-6">
+            <select
+              className="form-select"
+              value={entries}
+              onChange={(e) => {
+                setEntries(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              style={{
+                height: "35px",
+                borderRadius: "8px",
+              }}
+            >
+              <option value={10}>10 Entries</option>
+              <option value={25}>25 Entries</option>
+              <option value={50}>50 Entries</option>
+            </select>
+          </div>
 
-                        <li>
-                          <hr className="dropdown-divider" />
-                        </li>
+          {/* Export */}
+          <div className="col-xl-2 col-lg-2 col-md-6">
+            <button
+              type="button"
+              className="btn btn-outline-success w-100 d-flex align-items-center justify-content-center gap-2"
+              onClick={handleExport}
+              style={{
+                height: "35px",
+                borderRadius: "8px",
+              }}
+            >
+              <i className="ri-download-2-line"></i>
+              Export
+            </button>
+          </div>
+        </div>
+      </div>
 
-                        <li>
-                          <button
-                            className="dropdown-item text-danger"
-                            onClick={() => handleDelete(item._id)}
-                          >
-                            <i className="ri-delete-bin-line me-2"></i>
-                            Delete
-                          </button>
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
+      {/* Table / Empty State */}
+      <div
+        className="bg-white"
+        style={{
+          border: "1px solid #e9ecef",
+          borderRadius: "12px",
+          overflow: "hidden",
+        }}
+      >
+        {currentData.length === 0 ? (
+          <div className="text-center py-5 px-3">
+            <div
+              className="d-flex align-items-center justify-content-center mx-auto mb-3"
+              style={{
+                width: "64px",
+                height: "64px",
+                borderRadius: "50%",
+                background: "#f1f5f9",
+              }}
+            >
+              <i
+                className="ri-file-list-3-line"
+                style={{
+                  fontSize: "30px",
+                  color: "#94a3b8",
+                }}
+              />
+            </div>
+
+            <h6 className="fw-semibold mb-1">No Quotations Found</h6>
+
+            <p className="text-muted small mb-3">
+              Create your first quotation to get started.
+            </p>
+
+            <Link
+              href="/quotation/add"
+              className="btn btn-primary btn-sm px-3"
+              style={{
+                borderRadius: "7px",
+              }}
+            >
+              <i className="ri-add-line me-1"></i>
+              Create Quotation
+            </Link>
+          </div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-hover align-middle">
+              <thead style={{ background: "#f8fafc" }}>
+                <tr>
+                  <th className="px-3 py-3 text-muted small">#</th>
+
+                  <th className="py-3 text-muted small">Quotation No.</th>
+
+                  <th className="py-3 text-muted small">Party Name</th>
+
+                  <th className="py-3 text-muted small">Mobile</th>
+
+                  <th className="py-3 text-muted small fw-semibold">Amount</th>
+
+                  <th className="py-3 text-muted small fw-semibold">Date</th>
+
+                  <th className="py-3 text-muted small fw-semibold">Status</th>
+
+                  <th className="py-3 text-center text-muted small fw-semibold">
+                    Action
+                  </th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              </thead>
+
+              <tbody>
+                {currentData.map((item, index) => (
+                  <tr key={item._id}>
+                    <td>{index + 1}</td>
+
+                    <td>
+                      <span
+                        className="badge"
+                        style={{
+                          background: "#eef2ff",
+                          color: "#4f46e5",
+                          padding: "7px 10px",
+                          fontWeight: 500,
+                        }}
+                      >
+                        {item.quotation_number}
+                      </span>
+                    </td>
+
+                    <td>{item.party_name}</td>
+
+                    <td>{item.quotation_mobile}</td>
+
+                    {/* Amount */}
+                    <td>
+                      <span className="fw-semibold">
+                        ₹{" "}
+                        {Number(
+                          item.grand_total ??
+                            item.total_amount ??
+                            item.amount ??
+                            0,
+                        ).toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+                    </td>
+
+                    <td>{item.quotation_date}</td>
+
+                    {/* Status */}
+                    <td>
+                      {(() => {
+                        const status = item.status?.toLowerCase() || "pending";
+
+                        const statusConfig = {
+                          pending: {
+                            label: "Pending",
+                            bg: "#fff7ed",
+                            color: "#c2410c",
+                            dot: "#f97316",
+                          },
+                          approved: {
+                            label: "Approved",
+                            bg: "#ecfdf3",
+                            color: "#15803d",
+                            dot: "#16a34a",
+                          },
+                          rejected: {
+                            label: "Rejected",
+                            bg: "#fef2f2",
+                            color: "#dc2626",
+                            dot: "#dc2626",
+                          },
+                          sent: {
+                            label: "Sent",
+                            bg: "#eff6ff",
+                            color: "#2563eb",
+                            dot: "#3b82f6",
+                          },
+                          draft: {
+                            label: "Draft",
+                            bg: "#f1f5f9",
+                            color: "#475569",
+                            dot: "#64748b",
+                          },
+                        };
+
+                        const config =
+                          statusConfig[status] || statusConfig.pending;
+
+                        return (
+                          <span
+                            className="badge d-inline-flex align-items-center gap-1"
+                            style={{
+                              background: config.bg,
+                              color: config.color,
+                              padding: "6px 9px",
+                              borderRadius: "6px",
+                              fontWeight: 500,
+                            }}
+                          >
+                            <span
+                              style={{
+                                width: "6px",
+                                height: "6px",
+                                borderRadius: "50%",
+                                background: config.dot,
+                              }}
+                            />
+
+                            {config.label}
+                          </span>
+                        );
+                      })()}
+                    </td>
+
+                    <td>
+                      <div className="dropdown">
+                        <button
+                          className="btn btn-light btn-sm border-0"
+                          type="button"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          <i className="ri-more-2-fill fs-5"></i>
+                        </button>
+
+                        <ul className="dropdown-menu dropdown-menu-end shadow">
+                          <li>
+                            <Link
+                              href={`/quotation/edit/${item._id}`}
+                              className="dropdown-item"
+                            >
+                              <i className="ri-edit-line me-2"></i>
+                              Edit
+                            </Link>
+                          </li>
+
+                          <li>
+                            <button
+                              className="dropdown-item"
+                              onClick={() =>
+                                window.open(`/api/pdf/${item._id}`, "_blank")
+                              }
+                            >
+                              <i className="ri-file-pdf-line me-2"></i>
+                              PDF
+                            </button>
+                          </li>
+                          <li>
+                            <button
+                              className="dropdown-item"
+                              onClick={() => handleEmail(item)}
+                            >
+                              <i className="ri-mail-line me-2"></i>
+                              Email
+                            </button>
+                          </li>
+
+                          <li>
+                            <button
+                              className="dropdown-item"
+                              onClick={() => handleWhatsapp(item)}
+                            >
+                              <i className="ri-whatsapp-line me-2 text-success"></i>
+                              WhatsApp
+                            </button>
+                          </li>
+
+                          <li>
+                            <hr className="dropdown-divider" />
+                          </li>
+
+                          <li>
+                            <button
+                              className="dropdown-item text-danger"
+                              onClick={() => handleDelete(item._id)}
+                            >
+                              <i className="ri-delete-bin-line me-2"></i>
+                              Delete
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Pagination UI */}

@@ -141,7 +141,7 @@
 @media (max-width: 575px) {
   .profileShell {
     border-radius: 18px;
-    padding: 18px;
+    padding: 10px;
   }
 
   .profileHeader {

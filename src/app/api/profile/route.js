@@ -8,6 +8,39 @@ import User from "@/models/User";
 import fs from "fs";
 import path from "path";
 import sharp from "sharp";
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+async function sendWelcomeEmail({ email, name }) {
+  await transporter.sendMail({
+    from: `"MoveBook" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Welcome to MoveBook 🎉",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>Welcome to MoveBook, ${name}!</h2>
+
+        <p>Your account has been successfully created.</p>
+
+        <p>
+          Thank you for joining MoveBook. We're happy to have you with us.
+        </p>
+
+        <p>
+          Regards,<br>
+          <strong>MoveBook Team</strong>
+        </p>
+      </div>
+    `,
+  });
+}
 
 export async function getThemeColor(imageBuffer) {
   try {
@@ -391,6 +424,9 @@ export async function POST(req) {
       body.signature_public_id = signUpload.public_id;
     }
 
+    // First registration?
+const isNewRegistration = !authUser.isProfileCompleted;
+
     // JWT User
     body.userId = authUser.userId;
 
@@ -413,6 +449,18 @@ export async function POST(req) {
     await User.findByIdAndUpdate(authUser.userId, {
       isProfileCompleted: true,
     });
+
+    // Only first registration
+    if (isNewRegistration) {
+      try {
+        await sendWelcomeEmail({
+          email: authUser.email,
+          name: body.name || body.company_name || "User",
+        });
+      } catch (emailError) {
+        console.error("Welcome email failed:", emailError);
+      }
+    }
 
     return NextResponse.json({
       success: true,

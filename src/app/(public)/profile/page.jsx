@@ -219,7 +219,7 @@ const handleSubmit = async (event) => {
 
         <form onSubmit={handleSubmit} className="mt-4">
           <div className="row g-4">
-            <div className="col-lg-4">
+            <div className="col-lg-4 col-md-6">
               <div className={styles.uploadPanel}>
                 <h5>Business Logo</h5>
                 {logoPreview ? (
@@ -237,7 +237,7 @@ const handleSubmit = async (event) => {
               </div>
             </div>
 
-            <div className="col-lg-4">
+            <div className="col-lg-4 col-md-6">
               <div className={styles.uploadPanel}>
                 <h5>PAN Card</h5>
                 {panCardPreview ? (
@@ -257,7 +257,7 @@ const handleSubmit = async (event) => {
               </div>
             </div>
 
-            <div className="col-lg-4">
+            <div className="col-lg-4 col-md-6">
               <div className={styles.uploadPanel}>
                 <h5>Signature / Stamp</h5>
                 {signaturePreview ? (

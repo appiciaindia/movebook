@@ -43,3 +43,13 @@
 .formbutton {
   min-width: 140px;
 }
+
+@media (max-width: 768px) {
+  .bottomBar {
+    left: 0;
+    width: 100%;
+  }
+  .formbutton {
+    min-width: 100px;
+  }
+}

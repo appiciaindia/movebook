@@ -140,7 +140,7 @@ export default function Quotation() {
     gst_type: "1",
     qt_remark: "",
     discount: 0,
-    insurance_type: "Included in Freight",
+    insurance_type: "Optional",
     insurance_percent: "3%",
     ins_gst_percent: "0",
     dec_val_of_goods: "0",
@@ -1845,7 +1845,7 @@ export default function Quotation() {
 
             <div className="modal-body">
               <div className="container-fluid ">
-                <CustomerPage onSuccess={loadCustomers} />
+                <CustomerPage onSuccess={loadCustomers}  onClose={() => setShowCustomerModal(false)} />
               </div>
             </div>
           </div>

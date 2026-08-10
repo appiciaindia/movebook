@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
 
   
+  
 useEffect(() => {
   const fetchProfile = async () => {
     try {

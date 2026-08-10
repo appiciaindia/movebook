@@ -7,6 +7,7 @@ import CustomerPage from "@/component/customer/page";
 import Pagination from "../../../../../component/common/pagination/page";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { PiGreaterThanBold } from "react-icons/pi";
 
 export default function CustomerViewPage() {
   const { id } = useParams();
@@ -184,115 +185,303 @@ export default function CustomerViewPage() {
 
   return (
     <div className="container-fluid py-4">
-      {/* Header */}
-
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      {/* Customer Profile Header */}
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
-          <h4 className="">Customer Profile</h4>
-
-          <small className="text-muted">View customer information</small>
+          <h4 className=" mb-1">
+            {" "}
+            <span className="" onClick={() => router.back()}>
+              <i className="ri-arrow-left-line fs-4"></i>
+            </span>{" "}
+            Customer Profile
+          </h4>
+          <p className="text-muted small mb-0">
+            Dashboard <PiGreaterThanBold size={10} /> Customers{" "}
+            <PiGreaterThanBold size={10} /> Customers Profile
+          </p>
         </div>
 
         <button
-          className="btn btn-outline-primary"
+          className="btn btn-outline-primary d-flex align-items-center gap-2 d-none d-lg-block"
           onClick={() => router.back()}
         >
-          <i className="ri-arrow-left-line me-2"></i>
+          <i className="ri-arrow-left-line"></i>
           Back
         </button>
       </div>
 
-      {/* Customer Card */}
+      {/* Customer Profile Card */}
+      <div
+        className="bg-white"
+        style={{
+          border: "1px solid #e9ecef",
+          borderRadius: "14px",
+          overflow: "hidden",
+        }}
+      >
+        {/* Profile Top */}
+        <div
+          className="p-4"
+          style={{
+            background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)",
+          }}
+        >
+          <div className="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-3">
+            {/* Avatar */}
+            <div
+              className="d-flex align-items-center justify-content-center flex-shrink-0"
+              style={{
+                width: "76px",
+                height: "76px",
+                borderRadius: "16px",
+                background: "#eef2ff",
+                color: "#4f46e5",
+                fontSize: "30px",
+                fontWeight: 700,
+              }}
+            >
+              {customer.party_name?.charAt(0)?.toUpperCase()}
+            </div>
 
-      <div className="card  border-0 ">
-        <div className="card-body p-4">
-          <div className="row">
-            <div className="col-lg-2 text-center">
-              <div
-                className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto"
+            {/* Customer Name */}
+            <div className="text-center text-md-start flex-grow-1">
+              <div className="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-2">
+                <h3 className="fw-bold mb-0">{customer.party_name}</h3>
+
+                {customer.status && (
+                  <span
+                    className="badge d-inline-flex align-items-center gap-1"
+                    style={{
+                      background:
+                        customer.status?.toLowerCase() === "active"
+                          ? "#ecfdf3"
+                          : "#fef2f2",
+                      color:
+                        customer.status?.toLowerCase() === "active"
+                          ? "#15803d"
+                          : "#dc2626",
+                      padding: "6px 9px",
+                      borderRadius: "6px",
+                      fontWeight: 500,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        background:
+                          customer.status?.toLowerCase() === "active"
+                            ? "#16a34a"
+                            : "#dc2626",
+                      }}
+                    />
+                    {customer.status}
+                  </span>
+                )}
+              </div>
+
+              <p className="text-muted mb-2 mt-1">
+                {customer.company_name || "Individual Customer"}
+              </p>
+
+              <span
+                className="badge"
                 style={{
-                  width: 90,
-                  height: 90,
-                  fontSize: 34,
-                  fontWeight: 700,
+                  background: "#eef2ff",
+                  color: "#4f46e5",
+                  padding: "6px 10px",
+                  fontWeight: 500,
                 }}
               >
-                {customer.party_name?.charAt(0)}
+                {customer.customer_id}
+              </span>
+            </div>
+
+            {/* Edit */}
+            <button
+              className="btn btn-primary d-flex align-items-center gap-2 px-3"
+              onClick={() => {
+                setEditCustomerId(customer._id);
+                setShowEditCustomerModal(true);
+              }}
+            >
+              <i className="ri-edit-line"></i>
+              Edit Customer
+            </button>
+          </div>
+        </div>
+
+        {/* Customer Information */}
+        <div className="p-4 border-top">
+          <div className="row g-3">
+            {/* Mobile */}
+            <div className="col-xl-4 col-md-6">
+              <div
+                className="p-3 h-100"
+                style={{
+                  background: "#f8fafc",
+                  borderRadius: "10px",
+                }}
+              >
+                <div className="d-flex align-items-center gap-2 mb-2">
+                  <i
+                    className="ri-phone-line"
+                    style={{
+                      color: "#4f46e5",
+                      fontSize: "18px",
+                    }}
+                  />
+                  <span className="text-muted small">Mobile</span>
+                </div>
+
+                <div className="fw-semibold">{customer.mobile || "-"}</div>
               </div>
             </div>
 
-            <div className="col-lg-10">
-              <div className="d-flex justify-content-between align-items-center flex-wrap">
-                <div>
-                  <h3 className="fw-bold mb-1">{customer.party_name}</h3>
-
-                  <p className="text-muted mb-2">
-                    {customer.company_name || "Individual Customer"}
-                  </p>
+            {/* Email */}
+            <div className="col-xl-4 col-md-6">
+              <div
+                className="p-3 h-100"
+                style={{
+                  background: "#f8fafc",
+                  borderRadius: "10px",
+                }}
+              >
+                <div className="d-flex align-items-center gap-2 mb-2">
+                  <i
+                    className="ri-mail-line"
+                    style={{
+                      color: "#4f46e5",
+                      fontSize: "18px",
+                    }}
+                  />
+                  <span className="text-muted small">Email</span>
                 </div>
 
-                <div className="d-flex align-items-center gap-2">
-                  <span className="badge bg-success fs-6 px-3 py-2">
-                    {customer.customer_id}
-                  </span>
-
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => {
-                      setEditCustomerId(customer._id);
-                      setShowEditCustomerModal(true);
-                    }}
-                  >
-                    <i className="ri-edit-line me-1"></i>
-                    Edit
-                  </button>
+                <div className="fw-semibold text-break">
+                  {customer.email || "-"}
                 </div>
               </div>
+            </div>
 
-              <hr />
-
-              <div className="row g-4">
-                <div className="col-md-4">
-                  <div className="text-muted small">Mobile</div>
-
-                  <div className="fw-semibold">{customer.mobile}</div>
+            {/* GST */}
+            <div className="col-xl-4 col-md-6">
+              <div
+                className="p-3 h-100"
+                style={{
+                  background: "#f8fafc",
+                  borderRadius: "10px",
+                }}
+              >
+                <div className="d-flex align-items-center gap-2 mb-2">
+                  <i
+                    className="ri-file-text-line"
+                    style={{
+                      color: "#4f46e5",
+                      fontSize: "18px",
+                    }}
+                  />
+                  <span className="text-muted small">GST Number</span>
                 </div>
 
-                <div className="col-md-4">
-                  <div className="text-muted small">Email</div>
+                <div className="fw-semibold">{customer.gst_no || "-"}</div>
+              </div>
+            </div>
 
-                  <div className="fw-semibold">{customer.email || "-"}</div>
+            {/* City */}
+            <div className="col-xl-4 col-md-6">
+              <div
+                className="p-3 h-100"
+                style={{
+                  background: "#f8fafc",
+                  borderRadius: "10px",
+                }}
+              >
+                <div className="d-flex align-items-center gap-2 mb-2">
+                  <i
+                    className="ri-map-pin-line"
+                    style={{
+                      color: "#4f46e5",
+                      fontSize: "18px",
+                    }}
+                  />
+                  <span className="text-muted small">City</span>
                 </div>
 
-                <div className="col-md-4">
-                  <div className="text-muted small">GST Number</div>
+                <div className="fw-semibold">{customer.city || "-"}</div>
+              </div>
+            </div>
 
-                  <div className="fw-semibold">{customer.gst_no || "-"}</div>
+            {/* State */}
+            <div className="col-xl-4 col-md-6">
+              <div
+                className="p-3 h-100"
+                style={{
+                  background: "#f8fafc",
+                  borderRadius: "10px",
+                }}
+              >
+                <div className="d-flex align-items-center gap-2 mb-2">
+                  <i
+                    className="ri-government-line"
+                    style={{
+                      color: "#4f46e5",
+                      fontSize: "18px",
+                    }}
+                  />
+                  <span className="text-muted small">State</span>
                 </div>
 
-                <div className="col-md-4">
-                  <div className="text-muted small">City</div>
+                <div className="fw-semibold">{customer.state || "-"}</div>
+              </div>
+            </div>
 
-                  <div className="fw-semibold">{customer.city}</div>
+            {/* Pincode */}
+            <div className="col-xl-4 col-md-6">
+              <div
+                className="p-3 h-100"
+                style={{
+                  background: "#f8fafc",
+                  borderRadius: "10px",
+                }}
+              >
+                <div className="d-flex align-items-center gap-2 mb-2">
+                  <i
+                    className="ri-map-pin-2-line"
+                    style={{
+                      color: "#4f46e5",
+                      fontSize: "18px",
+                    }}
+                  />
+                  <span className="text-muted small">Pincode</span>
                 </div>
 
-                <div className="col-md-4">
-                  <div className="text-muted small">State</div>
+                <div className="fw-semibold">{customer.pincode || "-"}</div>
+              </div>
+            </div>
 
-                  <div className="fw-semibold">{customer.state || "-"}</div>
+            {/* Address */}
+            <div className="col-12">
+              <div
+                className="p-3"
+                style={{
+                  background: "#f8fafc",
+                  borderRadius: "10px",
+                }}
+              >
+                <div className="d-flex align-items-center gap-2 mb-2">
+                  <i
+                    className="ri-home-4-line"
+                    style={{
+                      color: "#4f46e5",
+                      fontSize: "18px",
+                    }}
+                  />
+                  <span className="text-muted small">Address</span>
                 </div>
 
-                <div className="col-md-4">
-                  <div className="text-muted small">Pincode</div>
-
-                  <div className="fw-semibold">{customer.pincode || "-"}</div>
-                </div>
-
-                <div className="col-12">
-                  <div className="text-muted small">Address</div>
-
-                  <div className="fw-semibold">{customer.address || "-"}</div>
-                </div>
+                <div className="fw-semibold">{customer.address || "-"}</div>
               </div>
             </div>
           </div>
@@ -352,15 +541,23 @@ export default function CustomerViewPage() {
           {activeTab === "quotation" && (
             <>
               {/* Header */}
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <h4>All Quotations</h4>
+              <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                <div>
+                  <h5 className="fw-bold mb-1">Quotations</h5>
+
+                  <p className="text-muted small mb-0">
+                    Manage all quotations for this customer
+                  </p>
+                </div>
+
                 <button
                   onClick={() =>
                     router.push(`/quotation/add?customerId=${customer._id}`)
                   }
-                  className="btn btn-primary"
+                  className="btn btn-primary d-flex align-items-center gap-2"
                 >
-                  + New
+                  <i className="ri-add-line"></i>
+                  New Quotation
                 </button>
               </div>
               {quotationLoading ? (
@@ -369,24 +566,68 @@ export default function CustomerViewPage() {
                 </div>
               ) : quotations.length === 0 ? (
                 <div className="text-center py-5">
-                  <h5 className="mt-3">No Quotation Found</h5>
+                  <div
+                    className="d-flex align-items-center justify-content-center mx-auto mb-3"
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      borderRadius: "50%",
+                      background: "#f1f5f9",
+                    }}
+                  >
+                    <i
+                      className="ri-file-list-3-line"
+                      style={{
+                        fontSize: "28px",
+                        color: "#94a3b8",
+                      }}
+                    />
+                  </div>
+
+                  <h6 className="fw-semibold mb-1">No Quotations Found</h6>
+
+                  <p className="text-muted small mb-3">
+                    Create your first quotation for this customer.
+                  </p>
+
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() =>
+                      router.push(`/quotation/add?customerId=${customer._id}`)
+                    }
+                  >
+                    <i className="ri-add-line me-1"></i>
+                    Create Quotation
+                  </button>
                 </div>
               ) : (
-                <div className="">
+                <div className="table-responsive">
                   <table className="table table-hover align-middle">
-                    <thead className="table-light">
+                    <thead style={{ background: "#f8fafc" }}>
                       <tr>
-                        <th>#</th>
+                        <th className="px-3 py-3 text-muted small">#</th>
 
-                        <th>Quotation No.</th>
+                        <th className="py-3 text-muted small">Quotation No.</th>
 
-                        <th>Party Name</th>
+                        <th className="py-3 text-muted small">Party Name</th>
 
-                        <th>Mobile</th>
+                        <th className="py-3 text-muted small">Mobile</th>
 
-                        <th>Date</th>
+                        <th className="py-3 text-muted small fw-semibold">
+                          Amount
+                        </th>
 
-                        <th>Action</th>
+                        <th className="py-3 text-muted small fw-semibold">
+                          Date
+                        </th>
+
+                        <th className="py-3 text-muted small fw-semibold">
+                          Status
+                        </th>
+
+                        <th className="py-3 text-center text-muted small fw-semibold">
+                          Action
+                        </th>
                       </tr>
                     </thead>
 
@@ -395,13 +636,109 @@ export default function CustomerViewPage() {
                         <tr key={item._id}>
                           <td>{index + 1}</td>
 
-                          <td>{item.quotation_number}</td>
+                          <td>
+                            <span
+                              className="badge"
+                              style={{
+                                background: "#eef2ff",
+                                color: "#4f46e5",
+                                padding: "7px 10px",
+                                fontWeight: 500,
+                              }}
+                            >
+                              {item.quotation_number}
+                            </span>
+                          </td>
 
                           <td>{item.party_name}</td>
 
                           <td>{item.quotation_mobile}</td>
 
+                          {/* Amount */}
+                          <td>
+                            <span className="fw-semibold">
+                              ₹{" "}
+                              {Number(
+                                item.grand_total ??
+                                  item.total_amount ??
+                                  item.amount ??
+                                  0,
+                              ).toLocaleString("en-IN", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </span>
+                          </td>
+
                           <td>{item.quotation_date}</td>
+
+                          {/* Status */}
+                          <td>
+                            {(() => {
+                              const status =
+                                item.status?.toLowerCase() || "pending";
+
+                              const statusConfig = {
+                                pending: {
+                                  label: "Pending",
+                                  bg: "#fff7ed",
+                                  color: "#c2410c",
+                                  dot: "#f97316",
+                                },
+                                approved: {
+                                  label: "Approved",
+                                  bg: "#ecfdf3",
+                                  color: "#15803d",
+                                  dot: "#16a34a",
+                                },
+                                rejected: {
+                                  label: "Rejected",
+                                  bg: "#fef2f2",
+                                  color: "#dc2626",
+                                  dot: "#dc2626",
+                                },
+                                sent: {
+                                  label: "Sent",
+                                  bg: "#eff6ff",
+                                  color: "#2563eb",
+                                  dot: "#3b82f6",
+                                },
+                                draft: {
+                                  label: "Draft",
+                                  bg: "#f1f5f9",
+                                  color: "#475569",
+                                  dot: "#64748b",
+                                },
+                              };
+
+                              const config =
+                                statusConfig[status] || statusConfig.pending;
+
+                              return (
+                                <span
+                                  className="badge d-inline-flex align-items-center gap-1"
+                                  style={{
+                                    background: config.bg,
+                                    color: config.color,
+                                    padding: "6px 9px",
+                                    borderRadius: "6px",
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      width: "6px",
+                                      height: "6px",
+                                      borderRadius: "50%",
+                                      background: config.dot,
+                                    }}
+                                  />
+
+                                  {config.label}
+                                </span>
+                              );
+                            })()}
+                          </td>
 
                           <td>
                             <div className="dropdown">

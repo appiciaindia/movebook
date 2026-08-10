@@ -79,7 +79,7 @@ useEffect(() => {
               <div className="col-lg-2 col-md-2 col-2">
                 <div>
                   <h3 className={`d-none d-lg-block mb-0 ${styles.brandName}`}>
-                    MoveBook
+                    <Link href="/dashboard">MoveBook</Link>
                   </h3>
                   <span
                     className="d-block d-lg-none"
@@ -141,7 +141,7 @@ useEffect(() => {
                 </div>
                 <div className="d-block d-lg-none ">
                   <h5 className={`mb-0 ${styles.mobileCompanyName}`}>
-                    MoveBook
+                    <Link href="/dashboard">MoveBook</Link>
                   </h5>
                 </div>
               </div>
@@ -210,15 +210,18 @@ useEffect(() => {
             className={`${styles.dektopMenu} ${openMenu ? styles.showMenu : ""}`}
           >
             <div className="d-block d-lg-none text-end p-2">
+           <div className="d-flex justify-content-between align-items-center">
+               <h4>Menu</h4>
               <i
                 className="ri-close-line fs-3"
                 onClick={() => setOpenMenu(false)}
                 style={{ cursor: "pointer" }}
               ></i>
+           </div>
             </div>
             <div>
               <ul className={styles.menulistContainer}>
-                <Link href="/dashboard" className="text-decoration-none">
+                <Link href="/dashboard"  onClick={() => setOpenMenu(false)} className="text-decoration-none">
                   <li
                     className={`${styles.menulist} ${
                       pathname === "/dashboard" ? styles.active : ""
@@ -229,7 +232,7 @@ useEffect(() => {
                   </li>
                 </Link>
 
-                <Link href="/customer" className="text-decoration-none">
+                <Link href="/customer"  onClick={() => setOpenMenu(false)} className="text-decoration-none">
                   <li
                     className={`${styles.menulist} ${
                       pathname.startsWith("/customer") ? styles.active : ""
@@ -240,7 +243,7 @@ useEffect(() => {
                   </li>
                 </Link>
 
-                <Link href="/quotation/view" className="text-decoration-none">
+                <Link href="/quotation/view"  onClick={() => setOpenMenu(false)} className="text-decoration-none">
                   <li
                     className={`${styles.menulist} ${
                       pathname.startsWith("/quotation") ? styles.active : ""

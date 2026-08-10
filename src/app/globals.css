@@ -67,6 +67,15 @@ select:focus {
  
 }
 
+table td,
+table th {
+  white-space: nowrap;
+}
+
+.table-responsive {
+height: calc(100vh - 200px);
+
+}
 
 /* 
 #pdf-content {

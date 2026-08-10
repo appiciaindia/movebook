@@ -9,315 +9,312 @@ import {
 } from "@react-pdf/renderer";
 
 const createStyles = (themeColor = "#000671") =>
-StyleSheet.create({
-  page: {
-    padding: 25,
-    fontSize: 10,
-    fontFamily: "Helvetica",
-    color: "#000",
-    position: "relative",
-  },
-  pageBorder: {
-    position: "absolute",
-    top: 15,
-    left: 15,
-    right: 15,
-    bottom: 15,
-    borderWidth: 1,
-    borderColor: themeColor,
-  },
+  StyleSheet.create({
+    page: {
+      padding: 25,
+      fontSize: 10,
+      fontFamily: "Helvetica",
+      color: "#000",
+      position: "relative",
+    },
+    pageBorder: {
+      position: "absolute",
+      top: 15,
+      left: 15,
+      right: 15,
+      bottom: 15,
+      borderWidth: 1,
+      borderColor: themeColor,
+    },
 
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
 
-  quotationDate: {
-    width: "50%",
-    color: "#000",
-  },
+    quotationDate: {
+      width: "50%",
+      color: "#000",
+    },
 
-  h4: {
-    fontSize: 14,
-  },
+    h4: {
+      fontSize: 14,
+    },
 
-  h4Span: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+    h4Span: {
+      fontSize: 16,
+      fontWeight: "bold",
+    },
 
-  p: {
-    fontSize: 11,
-    lineHeight: 1,
-    margin: 0,
-  },
+    p: {
+      fontSize: 11,
+      lineHeight: 1,
+      margin: 0,
+    },
 
-  pSpan: {
-    fontWeight: "bold",
-  },
+    pSpan: {
+      fontWeight: "bold",
+    },
 
-  clientDetails: {
-    marginTop: 10,
-  },
+    clientDetails: {
+      marginTop: 10,
+    },
 
-  clientText: {
-    fontSize: 11,
-    lineHeight: 1,
-    marginBottom: 2,
-  },
+    clientText: {
+      fontSize: 11,
+      lineHeight: 1,
+      marginBottom: 2,
+    },
 
-  clientLabel: {
-    fontSize: 11,
-    fontWeight: "bold",
-  },
+    clientLabel: {
+      fontSize: 11,
+      fontWeight: "bold",
+    },
 
-  logo: {
-    width: 150,
-    height: 50,
-    marginBottom: 3,
-    float: "right",
-  },
+    logo: {
+      width: 150,
+      height: 50,
+      marginBottom: 3,
+      float: "right",
+    },
 
-  company: {
-    width: "50%",
-    display: "flex",
-    alignItems: "flex-end",
-    justifyContent: "flex-end",
-  },
+    company: {
+      width: "50%",
+      display: "flex",
+      alignItems: "flex-end",
+      justifyContent: "flex-end",
+    },
 
-  companyName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: themeColor,
-  },
-  companyinfo: {
-    fontSize: 11,
-    lineHeight: 1,
-    marginBottom: 2,
-  },
-  heading: {
-    backgroundColor: themeColor,
-    color: "#fff",
-    padding: 6,
-    marginTop: 0,
-    marginBottom: 8,
-    fontSize: 14,
-    fontWeight: "bold",
-  },
+    companyName: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: themeColor,
+    },
+    companyinfo: {
+      fontSize: 11,
+      lineHeight: 1,
+      marginBottom: 2,
+    },
+    heading: {
+      backgroundColor: themeColor,
+      color: "#fff",
+      padding: 6,
+      marginTop: 0,
+      marginBottom: 8,
+      fontSize: 14,
+      fontWeight: "bold",
+    },
 
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 0,
-  },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 0,
+    },
 
-  box: {
-    width: "48%",
-  },
-  moveText: {
-    fontSize: 11,
-    lineHeight: 1,
-    marginBottom: 2,
-  },
+    box: {
+      width: "48%",
+    },
+    moveText: {
+      fontSize: 11,
+      lineHeight: 1,
+      marginBottom: 2,
+    },
 
-  moveLabel: {
-    fontSize: 11,
-    fontWeight: "bold",
-  },
+    moveLabel: {
+      fontSize: 11,
+      fontWeight: "bold",
+    },
 
-  label: {
-    fontWeight: "bold",
-    marginBottom: 3,
-  },
+    label: {
+      fontWeight: "bold",
+      marginBottom: 3,
+    },
 
-  paymentDetails: {
-    marginTop: 5,
-  },
+    paymentDetails: {
+      marginTop: 5,
+    },
 
-  paymentHeading: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#fff",
-    backgroundColor: themeColor, // Theme Color
-    padding: 5,
-    marginBottom: 10,
-  },
+    paymentHeading: {
+      fontSize: 14,
+      fontWeight: "bold",
+      color: "#fff",
+      backgroundColor: themeColor, // Theme Color
+      padding: 5,
+      marginBottom: 10,
+    },
 
-  paymentTable: {
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    fontSize: 11,
-  },
+    paymentTable: {
+      borderWidth: 1,
+      borderColor: "#e5e7eb",
+      fontSize: 11,
+    },
 
-  tableRow: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
+    tableRow: {
+      flexDirection: "row",
+      borderBottomWidth: 1,
+      borderBottomColor: "#e5e7eb",
+    },
 
-  tableCellLeft: {
-    width: "70%",
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-    borderRightWidth: 1,
-    borderRightColor: "#e5e7eb",
-  },
+    tableCellLeft: {
+      width: "70%",
+      paddingVertical: 4,
+      paddingHorizontal: 6,
+      borderRightWidth: 1,
+      borderRightColor: "#e5e7eb",
+    },
 
-  tableCellRight: {
-    width: "30%",
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-    textAlign: "left",
-  },
+    tableCellRight: {
+      width: "30%",
+      paddingVertical: 4,
+      paddingHorizontal: 6,
+      textAlign: "left",
+    },
 
-  tableData: {
-    backgroundColor: themeColor,
-    color: "#fff",
-  },
+    tableData: {
+      backgroundColor: themeColor,
+      color: "#fff",
+    },
 
-  amountSection: {
-    flexDirection: "row",
-    marginTop: 20,
-  },
+    amountSection: {
+      flexDirection: "row",
+      marginTop: 20,
+    },
 
-  signatureSection: {
-    width: "70%",
-    justifyContent: "space-between",
-    flexDirection: "row",
-    alignItems: "flex-end",
-    paddingRight: 20,
-  },
+    signatureSection: {
+      width: "70%",
+      justifyContent: "space-between",
+      flexDirection: "row",
+      alignItems: "flex-end",
+      paddingRight: 20,
+    },
 
-  amountTable: {
-    width: "30%",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-  },
+    amountTable: {
+      width: "30%",
+      borderWidth: 1,
+      borderColor: "#e5e7eb",
+    },
 
-  center: {
-    textAlign: "center",
-  },
+    center: {
+      textAlign: "center",
+    },
 
-  bold: {
-    fontWeight: "bold",
-  },
-  remark: {
-    fontSize: 11,
-    marginTop: 15,
-    marginBottom: 8,
-    lineHeight: 1.4,
-  },
-  tableCell: {
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-  },
-  tableRow: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
+    bold: {
+      fontWeight: "bold",
+    },
+    remark: {
+      fontSize: 11,
+      marginTop: 15,
+      marginBottom: 8,
+      lineHeight: 1.4,
+    },
+    tableCell: {
+      paddingVertical: 4,
+      paddingHorizontal: 6,
+    },
+    tableRow: {
+      flexDirection: "row",
+      borderBottomWidth: 1,
+      borderBottomColor: "#e5e7eb",
+    },
 
-  cellLabel: {
-    width: "25%",
-    padding: 5,
-    borderRightWidth: 1,
-    borderRightColor: "#e5e7eb",
-    fontWeight: "bold",
-  },
+    cellLabel: {
+      width: "25%",
+      padding: 5,
+      borderRightWidth: 1,
+      borderRightColor: "#e5e7eb",
+      fontWeight: "bold",
+    },
 
-  cellValue: {
-    width: "25%",
-    padding: 5,
-    borderRightWidth: 1,
-    borderRightColor: "#e5e7eb",
-  },
+    cellValue: {
+      width: "25%",
+      padding: 5,
+      borderRightWidth: 1,
+      borderRightColor: "#e5e7eb",
+    },
 
-  lastCell: {
-    borderRightWidth: 0,
-  },
+    lastCell: {
+      borderRightWidth: 0,
+    },
 
-  itemTable: {
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    fontSize: 12,
-  },
+    itemTable: {
+      marginTop: 20,
+      borderWidth: 1,
+      borderColor: "#e5e7eb",
+      fontSize: 12,
+    },
 
-  itemHeader: {
-    flexDirection: "row",
-    backgroundColor: themeColor, // Theme Color
-    color: "#fff",
-    fontWeight: "bold",
-  },
+    itemHeader: {
+      flexDirection: "row",
+      backgroundColor: themeColor, // Theme Color
+      color: "#fff",
+      fontWeight: "bold",
+    },
 
-  itemRow: {
-    flexDirection: "row",
-    borderTopWidth: 1,
-    borderTopColor: "#e5e7eb",
-  },
+    itemRow: {
+      flexDirection: "row",
+      borderTopWidth: 1,
+      borderTopColor: "#e5e7eb",
+    },
 
-  itemCell: {
-    padding: 5,
-    borderRightWidth: 1,
-    borderRightColor: "#e5e7eb",
-  },
+    itemCell: {
+      padding: 5,
+      borderRightWidth: 1,
+      borderRightColor: "#e5e7eb",
+    },
 
-  itemDescription: {
-    width: "25%",
-  },
+    itemDescription: {
+      width: "25%",
+    },
 
-  itemQty: {
-    width: "15%",
-    textAlign: "center",
-  },
+    itemQty: {
+      width: "15%",
+      textAlign: "center",
+    },
 
-  itemValue: {
-    width: "20%",
-    textAlign: "right",
-  },
+    itemValue: {
+      width: "20%",
+      textAlign: "right",
+    },
 
-  itemRemark: {
-    width: "40%",
-    borderRightWidth: 0,
-  },
+    itemRemark: {
+      width: "40%",
+      borderRightWidth: 0,
+    },
 
-  termsSection: {
-    marginTop: 20,
-  },
+    termsSection: {
+      marginTop: 20,
+    },
 
-  termsHeading: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
+    termsHeading: {
+      fontSize: 14,
+      fontWeight: "bold",
+      marginBottom: 8,
+    },
 
-  termsList: {
-    fontSize: 10,
-  },
+    termsList: {
+      fontSize: 10,
+    },
 
-  termsItem: {
-    flexDirection: "row",
-    marginBottom: 0,
-    lineHeight: 1,
-  },
+    termsItem: {
+      flexDirection: "row",
+      marginBottom: 0,
+      lineHeight: 1,
+    },
 
-  bullet: {
-    width: 10,
-    fontSize: 12,
-  },
+    bullet: {
+      width: 10,
+      fontSize: 12,
+    },
 
-  termsText: {
-    flex: 1,
-    fontSize: 10,
-    lineHeight: 1,
-  },
-});
+    termsText: {
+      flex: 1,
+      fontSize: 10,
+      lineHeight: 1,
+    },
+  });
 
 export default function Quotation({ data }) {
-
-   const styles = createStyles(
-    data?.theme_color || "#000671"
-  );
+  const styles = createStyles(data?.theme_color || "#000671");
 
   const subTotal = Number(data.sub_total || 0);
 
@@ -408,11 +405,11 @@ export default function Quotation({ data }) {
           </view>
 
           <View style={styles.company}>
-            <Image
+            {/* <Image
               src={`${process.env.NEXT_PUBLIC_BASE_URL}${data.company_logo}`}
               style={{ height: 60 }}
-            />
-            {/* <Image src={data?.company_logo || "-"} style={styles.logo} /> */}
+            /> */}
+            <Image src={data?.company_logo || "-"} style={{ height: 60 }} />
             <Text style={styles.companyName}>{data?.company_name || "-"}</Text>
 
             <Text style={styles.companyinfo}>{data?.address || "-"}</Text>
@@ -579,7 +576,7 @@ export default function Quotation({ data }) {
             {data.surcharge_type !== "Not Applicable" && (
               <View style={styles.tableRow}>
                 <Text style={styles.tableCellLeft}>
-                  Surcharge ({data.surcharge_percent}%)
+                  Surcharge ({data.surcharge_percent})
                 </Text>
                 <Text style={styles.tableCellRight}>
                   {data.surcharge_type === "Applicable"
@@ -596,34 +593,44 @@ export default function Quotation({ data }) {
                 <Text style={styles.tableCellLeft}>
                   {Number(data.gst_in_out) === 1 &&
                     `GST (${data.gst_percent}%)`}
+
                   {Number(data.gst_in_out) === 2 && `GST Excluded`}
+
                   {Number(data.gst_in_out) === 4 && `GST Exempted`}
+
                   {Number(data.gst_in_out) === 5 &&
                     `GST (${data.gst_percent}%)`}
+
                   {Number(data.gst_in_out) === 6 &&
                     `GST (${data.gst_percent}%) Included In Subtotal Amount`}
                 </Text>
-                <Text style={styles.tableCellRight}>
-                  {/* ✅ CASE 1: CGST/SGST */}
+
+                <View style={styles.tableCellRight}>
+                  {/* CASE 1: CGST + SGST */}
                   {Number(data.gst_in_out) === 1 && data.gst_type === "1" && (
-                    <View>
+                    <>
                       <Text>CGST: {Number(cgst).toFixed(2)}</Text>
+
                       <Text>SGST: {Number(sgst).toFixed(2)}</Text>
-                    </View>
+                    </>
                   )}
 
-                  {/* ✅ CASE 2: IGST */}
+                  {/* CASE 2: IGST */}
                   {Number(data.gst_in_out) === 1 && data.gst_type === "2" && (
                     <Text>IGST: {Number(totalGST).toFixed(2)}</Text>
                   )}
 
-                  {/* बाकी conditions same */}
-                  {Number(data.gst_in_out) === 2 &&
-                    `GST (${data.gst_percent}%)`}
-                  {Number(data.gst_in_out) === 4 && `GST (0%)`}
-                  {Number(data.gst_in_out) === 5 && `Extra`}
-                  {Number(data.gst_in_out) === 6 && `Included`}
-                </Text>
+                  {/* बाकी conditions */}
+                  {Number(data.gst_in_out) === 2 && (
+                    <Text>GST ({data.gst_percent}%)</Text>
+                  )}
+
+                  {Number(data.gst_in_out) === 4 && <Text>GST (0%)</Text>}
+
+                  {Number(data.gst_in_out) === 5 && <Text>Extra</Text>}
+
+                  {Number(data.gst_in_out) === 6 && <Text>Included</Text>}
+                </View>
               </View>
             )}
             <View style={styles.tableRow}>
@@ -694,10 +701,7 @@ export default function Quotation({ data }) {
           <View style={styles.signatureSection}>
             <View>
               {data.signature ? (
-                <Image
-                  src={`${process.env.NEXT_PUBLIC_BASE_URL}${data.signature}`}
-                  style={{ width: 120, height: 60 }}
-                />
+                <Image src={data?.signature || "-"} style={{ height: 60 }} />
               ) : (
                 "-"
               )}

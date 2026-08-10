@@ -73,9 +73,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className={`container-fluid bg-white p-4 ${styles.pageContainer}`}>
+    <div className={`container-fluid bg-white ${styles.pageContainer}`}>
       <div className="row justify-content-center align-items-center">
-        <div className={`col-lg-12 p-4 ${styles.registerContainer}`}>
+        <div className={`col-lg-12 ${styles.registerContainer}`}>
           <div className="row g-0 align-items-center">
             <div className="col-lg-12">
               <div className={styles.formBox}>
