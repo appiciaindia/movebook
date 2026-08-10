@@ -181,11 +181,12 @@ const createStyles = (themeColor = "#000671") =>
     },
 
     signatureSection: {
-      width: "70%",
+      width: "100%",
       justifyContent: "space-between",
       flexDirection: "row",
       alignItems: "flex-end",
       paddingRight: 20,
+      marginBottom: 20,
     },
 
     amountTable: {
@@ -694,6 +695,29 @@ export default function Quotation({ data }) {
                 </Text>
               </View>
             )}
+
+                        <View style={styles.tableRow}>
+              <Text style={styles.tableCellLeft}>Total Amount</Text>
+              <Text style={styles.tableCellRight}>
+                {totalAmount.toFixed(2)}
+              </Text>
+            </View>
+
+            <View style={styles.tableRow}>
+              <Text style={styles.tableCellLeft}>Advance Paid</Text>
+              <Text style={styles.tableCellRight}>
+                {data?.advance_paid || "-"}
+              </Text>
+            </View>
+
+            <View style={styles.tableRow}>
+              <Text style={[styles.tableCellLeft, styles.tableData]}>
+                Payable Amount
+              </Text>
+              <Text style={[styles.tableCellRight, styles.tableData]}>
+                {payableAmount.toFixed(2)}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -714,7 +738,7 @@ export default function Quotation({ data }) {
           </View>
 
           {/* Amount Due Table */}
-          <View style={styles.amountTable}>
+          {/* <View style={styles.amountTable}>
             <View style={styles.tableRow}>
               <Text
                 style={[
@@ -750,7 +774,7 @@ export default function Quotation({ data }) {
                 {payableAmount.toFixed(2)}
               </Text>
             </View>
-          </View>
+          </View> */}
         </View>
 
         <View break>

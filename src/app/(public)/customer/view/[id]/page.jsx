@@ -622,7 +622,7 @@ export default function CustomerViewPage() {
                         </th>
 
                         <th className="py-3 text-muted small fw-semibold">
-                          Status
+                          View
                         </th>
 
                         <th className="py-3 text-center text-muted small fw-semibold">
@@ -672,72 +672,16 @@ export default function CustomerViewPage() {
 
                           <td>{item.quotation_date}</td>
 
-                          {/* Status */}
+                          {/* View */}
                           <td>
-                            {(() => {
-                              const status =
-                                item.status?.toLowerCase() || "pending";
-
-                              const statusConfig = {
-                                pending: {
-                                  label: "Pending",
-                                  bg: "#fff7ed",
-                                  color: "#c2410c",
-                                  dot: "#f97316",
-                                },
-                                approved: {
-                                  label: "Approved",
-                                  bg: "#ecfdf3",
-                                  color: "#15803d",
-                                  dot: "#16a34a",
-                                },
-                                rejected: {
-                                  label: "Rejected",
-                                  bg: "#fef2f2",
-                                  color: "#dc2626",
-                                  dot: "#dc2626",
-                                },
-                                sent: {
-                                  label: "Sent",
-                                  bg: "#eff6ff",
-                                  color: "#2563eb",
-                                  dot: "#3b82f6",
-                                },
-                                draft: {
-                                  label: "Draft",
-                                  bg: "#f1f5f9",
-                                  color: "#475569",
-                                  dot: "#64748b",
-                                },
-                              };
-
-                              const config =
-                                statusConfig[status] || statusConfig.pending;
-
-                              return (
-                                <span
-                                  className="badge d-inline-flex align-items-center gap-1"
-                                  style={{
-                                    background: config.bg,
-                                    color: config.color,
-                                    padding: "6px 9px",
-                                    borderRadius: "6px",
-                                    fontWeight: 500,
-                                  }}
-                                >
-                                  <span
-                                    style={{
-                                      width: "6px",
-                                      height: "6px",
-                                      borderRadius: "50%",
-                                      background: config.dot,
-                                    }}
-                                  />
-
-                                  {config.label}
-                                </span>
-                              );
-                            })()}
+                            <button
+                              className="btn btn-outline-primary btn-sm"
+                              onClick={() =>
+                                window.open(`/api/pdf/${item._id}`, "_blank")
+                              }
+                            >
+                              <i className="ri-eye-line"></i>
+                            </button>
                           </td>
 
                           <td>
