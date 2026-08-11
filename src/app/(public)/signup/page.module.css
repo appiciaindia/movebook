@@ -77,6 +77,10 @@
   background-image: url('/images/loginmobile1.png');
   background-size: cover;
   padding: 25px;
+  width: 100%;
+  height: 100vh;
+  
+
 }
 .loginconatiner {
   background: rgba(255, 255, 255, 0.12);
