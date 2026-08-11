@@ -292,7 +292,7 @@ export default function LoginPage() {
                           {canResend ? (
                             <button
                               type="button"
-                              className="btn btn-link p-0"
+                              className="btn btn-link p-0 text-danger"
                               onClick={resendOtp}
                             >
                               <FiRefreshCw size={15} className="me-1" />
@@ -312,13 +312,13 @@ export default function LoginPage() {
                             Sent to <strong>{email}</strong>
                             <button
                               type="button"
-                              className="btn btn-link btn-sm p-0 ms-1"
+                              className="btn btn-link btn-sm p-0 ms-1 text-danger"
                               onClick={() => {
                                 setStep("email");
                                 setOtp(["", "", "", ""]);
                               }}
                             >
-                              <FiEdit3 size={13} className="me-1" />
+                              <FiEdit3 size={13} className="me-1 text-danger" />
                               Change
                             </button>
                           </small>
@@ -359,7 +359,7 @@ export default function LoginPage() {
                   {/* Signup */}
                   <p className="text-center mt-3 mb-2">
                     Don't have an account?{" "}
-                    <a href="/signup" className="text-primary">
+                    <a href="/signup" className="text-danger">
                       Create account
                     </a>
                   </p>
