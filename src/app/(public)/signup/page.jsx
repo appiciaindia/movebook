@@ -200,7 +200,7 @@ export default function SignUpPage() {
       {step === "email" && (
         <div className="text-center mb-4">
           <div
-            className="d-flex align-items-center justify-content-center mx-auto mb-3"
+            className="d-flex align-items-center justify-content-center mx-auto mb-1"
             style={{
               width: 70,
               height: 70,
@@ -214,11 +214,11 @@ export default function SignUpPage() {
             />
           </div>
 
-          <h3 className="fw-bold mb-1">
+          <h4 className="fw-bold mb-1">
             Create your account
-          </h3>
+          </h4>
 
-          <p className="text-muted mb-0">
+          <p className=" mb-0">
             Signup using Email OTP verification.
           </p>
         </div>
@@ -229,7 +229,7 @@ export default function SignUpPage() {
         <form onSubmit={sendOtp}>
           <div className="mb-3">
             <label
-              className="text-muted small mb-1"
+              className=" small mb-1"
               htmlFor="email"
             >
               Email Address
@@ -297,7 +297,7 @@ export default function SignUpPage() {
                 color="#0d6efd"
               />
 
-              <div className="small text-muted mt-1">
+              <div className="small  mt-1">
                 Enter the 4-digit OTP
               </div>
             </div>
@@ -343,7 +343,7 @@ export default function SignUpPage() {
                   Resend OTP
                 </button>
               ) : (
-                <small className="text-muted">
+                <small className="">
                   <FiClock
                     size={14}
                     className="me-1"
@@ -358,7 +358,7 @@ export default function SignUpPage() {
               <small>
                 <FiMail
                   size={14}
-                  className="me-1 text-muted"
+                  className="me-1 "
                 />
 
                 Sent to <strong>{email}</strong>
@@ -373,7 +373,7 @@ export default function SignUpPage() {
                 >
                   <FiEdit3
                     size={13}
-                    className="me-1"
+                    className="me-1 "
                   />
                   Change
                 </button>
@@ -434,7 +434,7 @@ export default function SignUpPage() {
         Already have an account?{" "}
         <a
           href="/login"
-          className="text-primary"
+          className=""
         >
           Log in
         </a>

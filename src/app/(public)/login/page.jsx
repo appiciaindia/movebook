@@ -178,6 +178,7 @@ export default function LoginPage() {
                   {/* Welcome Header */}
                   {step === "email" && (
                   <div className="text-center mb-4">
+               
                     <div
                       className="d-flex align-items-center justify-content-center mx-auto mb-3"
                       style={{
@@ -190,9 +191,9 @@ export default function LoginPage() {
                       <FaUser size={40} color="#0d6efd" />
                     </div>
 
-                    <h3 className="fw-bold mb-1">Welcome Back</h3>
+                    <h4 className="fw-bold mb-1">Welcome Back</h4>
 
-                    <p className="text-muted mb-0">
+                    <p className="mb-0">
                       Login using Email OTP verification.
                     </p>
                   </div>
@@ -202,7 +203,7 @@ export default function LoginPage() {
                   {step === "email" && (
                     <form onSubmit={sendOtp}>
                       <div className="mb-3">
-                        <label className="text-muted small mb-1">
+                        <label className="small mb-1">
                           Email Address
                         </label>
 
@@ -259,7 +260,7 @@ export default function LoginPage() {
                         <div className="text-center mb-3">
                           <MdOutlineSecurity size={30} color="#0d6efd" />
 
-                          <div className="small text-muted mt-1">
+                          <div className="small  mt-1">
                             Enter the 4-digit OTP
                           </div>
                         </div>
@@ -298,7 +299,7 @@ export default function LoginPage() {
                               Resend OTP
                             </button>
                           ) : (
-                            <small className="text-muted">
+                            <small className="">
                               <FiClock size={14} className="me-1" />
                               Resend OTP in {timer}s
                             </small>
@@ -307,7 +308,7 @@ export default function LoginPage() {
 
                         <div className="text-center mt-2">
                           <small>
-                            <FiMail size={14} className="me-1 text-muted" />
+                            <FiMail size={14} className="me-1" />
                             Sent to <strong>{email}</strong>
                             <button
                               type="button"
