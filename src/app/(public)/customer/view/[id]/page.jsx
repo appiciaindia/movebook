@@ -617,6 +617,9 @@ export default function CustomerViewPage() {
                           Amount
                         </th>
 
+                        <th className="py-3 text-muted small fw-semibold">City</th>
+
+
                         <th className="py-3 text-muted small fw-semibold">
                           Date
                         </th>
@@ -661,7 +664,7 @@ export default function CustomerViewPage() {
                               {Number(
                                 item.grand_total ??
                                   item.total_amount ??
-                                  item.amount ??
+                                  item.sub_total ??
                                   0,
                               ).toLocaleString("en-IN", {
                                 minimumFractionDigits: 2,
@@ -670,6 +673,8 @@ export default function CustomerViewPage() {
                             </span>
                           </td>
 
+                            <td>{item.origin_city}</td>
+ 
                           <td>{item.quotation_date}</td>
 
                           {/* View */}

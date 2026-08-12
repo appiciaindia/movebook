@@ -81,14 +81,25 @@ export default function QuotationsPage() {
   };
 
   // Search Filter
-  const filteredData = data.filter(
-    (item) =>
-      item.party_name?.toLowerCase().includes(search.toLowerCase()) ||
-      item.quotation_company_name
-        ?.toLowerCase()
-        .includes(search.toLowerCase()) ||
-      item.quotation_number?.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filteredData = data.filter((item) => {
+    const searchText = search.toLowerCase().trim();
+
+    const matchesSearch =
+      !searchText ||
+      item.party_name?.toLowerCase().includes(searchText) ||
+      item.quotation_company_name?.toLowerCase().includes(searchText) ||
+      item.quotation_number?.toLowerCase().includes(searchText);
+
+    const matchesStatus =
+      !statusFilter ||
+      item.status?.toLowerCase() === statusFilter.toLowerCase();
+
+    const matchesCity =
+      !cityFilter ||
+      item.origin_city?.toLowerCase() === cityFilter.toLowerCase();
+
+    return matchesSearch && matchesStatus && matchesCity;
+  });
   const handleWhatsapp = (item) => {
     const phone = item.customer?.mobile || item.quotation_mobile;
     const message = `Hello`;
@@ -151,9 +162,9 @@ export default function QuotationsPage() {
       item.quotation_mobile || "",
       item.quotation_email || "",
       item.origin_city || "",
-      Number(item.grand_total ?? item.total_amount ?? item.amount ?? 0).toFixed(
-        2,
-      ),
+      Number(
+        item.grand_total ?? item.total_amount ?? item.sub_total ?? 0,
+      ).toFixed(2),
       item.status || "Pending",
       item.createdAt
         ? new Date(item.createdAt).toLocaleDateString("en-IN")
@@ -205,7 +216,7 @@ export default function QuotationsPage() {
 
         <Link
           href="/quotation/add"
-          className="btn btn-primary d-flex align-items-center gap-2 px-3"
+          className="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-3"
           style={{
             height: "42px",
             borderRadius: "8px",
@@ -243,7 +254,7 @@ export default function QuotationsPage() {
               <div className="text-center text-lg-start">
                 <p className="text-muted small mb-1">Total Quotations</p>
 
-                <h4 className="fw-bold mb-0">{quotationData.length}</h4>
+                <h4 className="fw-bold mb-0">{currentData.length}</h4>
               </div>
             </div>
           </div>
@@ -276,7 +287,7 @@ export default function QuotationsPage() {
 
                 <h4 className="fw-bold mb-0">
                   {
-                    quotationData.filter(
+                    currentData.filter(
                       (item) => item.status?.toLowerCase() === "draft",
                     ).length
                   }
@@ -313,7 +324,7 @@ export default function QuotationsPage() {
 
                 <h4 className="fw-bold mb-0">
                   {
-                    quotationData.filter(
+                    currentData.filter(
                       (item) => item.status?.toLowerCase() === "sent",
                     ).length
                   }
@@ -350,7 +361,7 @@ export default function QuotationsPage() {
 
                 <h4 className="fw-bold mb-0">
                   {
-                    quotationData.filter(
+                    currentData.filter(
                       (item) => item.status?.toLowerCase() === "approved",
                     ).length
                   }
@@ -404,7 +415,7 @@ export default function QuotationsPage() {
           </div>
 
           {/* Status */}
-          <div className="col-xl-2 col-lg-2 col-md-6">
+          <div className="col-xl-2 col-lg-2 col-md-6 col-4">
             <select
               className="form-select"
               value={statusFilter}
@@ -427,7 +438,7 @@ export default function QuotationsPage() {
           </div>
 
           {/* City */}
-          <div className="col-xl-2 col-lg-2 col-md-6">
+          <div className="col-xl-2 col-lg-2 col-md-6 col-4">
             <select
               className="form-select"
               value={cityFilter}
@@ -444,7 +455,7 @@ export default function QuotationsPage() {
 
               {[
                 ...new Set(
-                  quotationData.map((item) => item.origin_city).filter(Boolean),
+                  currentData.map((item) => item.origin_city).filter(Boolean),
                 ),
               ].map((city) => (
                 <option key={city} value={city}>
@@ -455,7 +466,7 @@ export default function QuotationsPage() {
           </div>
 
           {/* Entries */}
-          <div className="col-xl-2 col-lg-2 col-md-6">
+          <div className="col-xl-2 col-lg-2 col-md-6 col-4">
             <select
               className="form-select"
               value={entries}
@@ -553,6 +564,8 @@ export default function QuotationsPage() {
 
                   <th className="py-3 text-muted small fw-semibold">Amount</th>
 
+                  <th className="py-3 text-muted small fw-semibold">City</th>
+
                   <th className="py-3 text-muted small fw-semibold">Date</th>
 
                   <th className="py-3 text-muted small fw-semibold">View</th>
@@ -592,8 +605,8 @@ export default function QuotationsPage() {
                         ₹{" "}
                         {Number(
                           item.grand_total ??
-                            item.total_amount ??
-                            item.amount ??
+                            item.totalAmount ??
+                            item.sub_total ??
                             0,
                         ).toLocaleString("en-IN", {
                           minimumFractionDigits: 2,
@@ -602,18 +615,20 @@ export default function QuotationsPage() {
                       </span>
                     </td>
 
+                    <td>{item.origin_city}</td>
+
                     <td>{item.quotation_date}</td>
 
                     {/* View */}
                     <td>
-                  <button
-                    className="btn btn-outline-primary btn-sm"
-                    onClick={() =>
-                      window.open(`/api/pdf/${item._id}`, "_blank")
-                    }
-                  >
-                   <i className="ri-eye-line"></i>
-                  </button>
+                      <button
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() =>
+                          window.open(`/api/pdf/${item._id}`, "_blank")
+                        }
+                      >
+                        <i className="ri-eye-line"></i>
+                      </button>
                     </td>
 
                     <td>

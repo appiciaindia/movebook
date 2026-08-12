@@ -79,7 +79,12 @@ useEffect(() => {
               <div className="col-lg-2 col-md-2 col-2">
                 <div>
                   <h3 className={`d-none d-lg-block mb-0 ${styles.brandName}`}>
-                    <Link href="/dashboard">MoveBook</Link>
+                    <Link href="/dashboard">     <img
+                  
+                  src="/images/logo1.png"
+                  width={170}
+                  alt="login"
+                /></Link>
                   </h3>
                   <span
                     className="d-block d-lg-none"
@@ -93,7 +98,7 @@ useEffect(() => {
                 <div className="d-none d-lg-block">
                   <div className={styles.searchBar}>
                     <span>
-                      <i className="ri-history-line fs-4"></i>
+                      <i className="ri-history-line fs-4 d-none"></i>
                     </span>
                     <span className={styles.searchContainer}>
                       <i className="ri-search-line"></i>
@@ -141,7 +146,14 @@ useEffect(() => {
                 </div>
                 <div className="d-block d-lg-none ">
                   <h5 className={`mb-0 ${styles.mobileCompanyName}`}>
-                    <Link href="/dashboard">MoveBook</Link>
+                    <Link href="/dashboard">
+                         <img
+                  
+                  src="/images/logo1.png"
+                  width={170}
+                  alt="login"
+                />
+                    </Link>
                   </h5>
                 </div>
               </div>

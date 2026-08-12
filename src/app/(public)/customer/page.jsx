@@ -82,14 +82,31 @@ function page() {
   }, [userId, searchTerm, refresh]);
 
   // Search Filter
-  const filteredData = customers.filter(
-    (item) =>
-      item.party_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.customer_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.mobile?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.email?.toLowerCase().includes(searchTerm.toLowerCase()),
+const filteredData = customers.filter((item) => {
+  const search = searchTerm.toLowerCase().trim();
+
+  const matchesSearch =
+    !search ||
+    item.party_name?.toLowerCase().includes(search) ||
+    item.company_name?.toLowerCase().includes(search) ||
+    item.customer_id?.toLowerCase().includes(search) ||
+    item.mobile?.toLowerCase().includes(search) ||
+    item.email?.toLowerCase().includes(search);
+
+  const matchesStatus =
+    !statusFilter ||
+    item.status?.toLowerCase() === statusFilter.toLowerCase();
+
+  const matchesCity =
+    !cityFilter ||
+    item.city?.toLowerCase() === cityFilter.toLowerCase();
+
+  return (
+    matchesSearch &&
+    matchesStatus &&
+    matchesCity
   );
+});
 
   // Delete with SweetAlert
   const handleDelete = async (id) => {
@@ -317,7 +334,7 @@ function page() {
                 <div className="text-center text-lg-start">
                   <p className="text-muted small mb-1">Active Customers</p>
 
-                  <h4 className="fw-bold mb-0">{activeCustomers}</h4>
+                  <h4 className="fw-bold mb-0">{totalCustomers}</h4>
                 </div>
               </div>
             </div>
@@ -427,7 +444,7 @@ function page() {
             </div>
 
             {/* Status */}
-            <div className="col-xl-2 col-lg-2 col-md-6">
+            <div className="col-xl-2 col-lg-2 col-md-6 col-4">
               <select
                 className="form-select"
                 value={statusFilter}
@@ -447,7 +464,7 @@ function page() {
             </div>
 
             {/* City */}
-            <div className="col-xl-2 col-lg-2 col-md-6">
+            <div className="col-xl-2 col-lg-2 col-md-6 col-4">
               <select
                 className="form-select"
                 value={cityFilter}
@@ -475,7 +492,7 @@ function page() {
             </div>
 
             {/* Entries */}
-            <div className="col-xl-2 col-lg-2 col-md-6">
+            <div className="col-xl-2 col-lg-2 col-md-6 col-4">
               <select
                 className="form-select"
                 value={entries}
@@ -659,6 +676,29 @@ function page() {
                       {/* Status */}
                       <td>
                         {customer.status?.toLowerCase() === "active" ? (
+                             <span
+                            className="badge d-inline-flex align-items-center gap-1"
+                            style={{
+                              background: "#fef2f2",
+                              color: "#dc2626",
+                              fontWeight: 500,
+                              padding: "6px 9px",
+                              borderRadius: "6px",
+                            }}
+                          >
+                            <span
+                              style={{
+                                width: "6px",
+                                height: "6px",
+                                borderRadius: "50%",
+                                background: "#dc2626",
+                              }}
+                            />
+                            Inactive
+                          </span>
+
+                       
+                        ) : (
                           <span
                             className="badge d-inline-flex align-items-center gap-1"
                             style={{
@@ -678,27 +718,6 @@ function page() {
                               }}
                             />
                             Active
-                          </span>
-                        ) : (
-                          <span
-                            className="badge d-inline-flex align-items-center gap-1"
-                            style={{
-                              background: "#fef2f2",
-                              color: "#dc2626",
-                              fontWeight: 500,
-                              padding: "6px 9px",
-                              borderRadius: "6px",
-                            }}
-                          >
-                            <span
-                              style={{
-                                width: "6px",
-                                height: "6px",
-                                borderRadius: "50%",
-                                background: "#dc2626",
-                              }}
-                            />
-                            Inactive
                           </span>
                         )}
                       </td>

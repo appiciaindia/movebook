@@ -13,14 +13,14 @@ import nodemailer from "nodemailer";
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.SMTP_EMAIL,
+    pass: process.env.SMTP_PASSWORD,
   },
 });
 
 async function sendWelcomeEmail({ email, name }) {
   await transporter.sendMail({
-    from: `"MoveBook" <${process.env.EMAIL_USER}>`,
+    from: `"MoveBook" <${process.env.SMTP_EMAIL}>`,
     to: email,
     subject: "Welcome to MoveBook 🎉",
     html: `
@@ -425,7 +425,8 @@ export async function POST(req) {
     }
 
     // First registration?
-const isNewRegistration = !authUser.isProfileCompleted;
+ const isNewRegistration = !authUser.isProfileCompleted;
+ 
 
     // JWT User
     body.userId = authUser.userId;
@@ -457,6 +458,7 @@ const isNewRegistration = !authUser.isProfileCompleted;
           email: authUser.email,
           name: body.name || body.company_name || "User",
         });
+         
       } catch (emailError) {
         console.error("Welcome email failed:", emailError);
       }
