@@ -554,7 +554,7 @@ export default function CustomerViewPage() {
                   onClick={() =>
                     router.push(`/quotation/add?customerId=${customer._id}`)
                   }
-                  className="btn btn-primary d-flex align-items-center gap-2"
+                  className="btn btn-primary d-flex align-items-center justify-content-center gap-2"
                 >
                   <i className="ri-add-line"></i>
                   New Quotation
