@@ -145,7 +145,7 @@ useEffect(() => {
                   </div>
                 </div>
                 <div className="d-block d-lg-none ">
-                  <h5 className={`mb-0 ${styles.mobileCompanyName}`}>
+                  <h5 className={`mb-0 text-center ${styles.mobileCompanyName}`}>
                     <Link href="/dashboard">
                          <img
                   
